@@ -1,11 +1,11 @@
 import { Repository } from 'typeorm';
 import { Injectable } from '@nestjs/common';
 import { DataSource } from 'typeorm';
-import { MenuEntity } from '../entities/menu.entity';
+import { MenuRestaurant } from '../entities/menu.entity';
 
 @Injectable()
-export class MenuRepository extends Repository<MenuEntity> {
+export class MenuRepository extends Repository<MenuRestaurant> {
   constructor(private readonly dataSource: DataSource) {
-    super(MenuEntity, dataSource.createEntityManager());
+    super(MenuRestaurant, dataSource.createEntityManager());
   }
 }

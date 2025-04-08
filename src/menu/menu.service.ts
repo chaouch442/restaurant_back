@@ -4,8 +4,8 @@ import { Repository } from 'typeorm';
 
 import { CreateMenuDto } from './types/dtos/create-menu.dto';
 import { UpdateMenuDto } from './types/dtos/update-menu.dto';
-import { MenuEntity } from './entities/menu.entity';
 import { MealTime } from 'src/plats/enums/meal-time.enum';
+import { MenuRestaurant } from './entities/menu.entity';
 
 @Injectable()
 export class MenuService {
@@ -13,8 +13,8 @@ export class MenuService {
       throw new Error('Method not implemented.');
   }
   constructor(
-    @InjectRepository(MenuEntity)
-    private menuRepository: Repository<MenuEntity>,
+    @InjectRepository(MenuRestaurant)
+    private menuRepository: Repository<MenuRestaurant>,
   ) {}
 
   async createMenu(createMenuDto: CreateMenuDto){

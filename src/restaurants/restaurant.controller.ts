@@ -38,10 +38,22 @@ export class RestaurantController {
   }
   @Patch(':id')
   @Roles('admin')
-       async updateRestaurant(@Param('id', ParseUUIDPipe) id: string, @Body() updaterestaurantDto : UpdateRestaurantDto) {
-     console.log('updateRestaurantDto:', updaterestaurantDto);
-      return this.restaurantService.updateRestaurant(id, updaterestaurantDto);
+   async updateRestaurant(@Param('id', ParseUUIDPipe) id: string, @Body() updaterestaurantDto : UpdateRestaurantDto) {
+  console.log('updateRestaurantDto:', updaterestaurantDto);
+  return this.restaurantService.updateRestaurant(id, updaterestaurantDto);
       }
+  @Patch('deactivate/:id')
+@Roles('admin') 
+async deactivateRestaurant(@Param('id', ParseUUIDPipe) id: string) {
+  return this.restaurantService.deactivateRestaurant(id);
+}
+@Patch(':id/toggle-active')
+@Roles('admin')
+async toggleRestaurantActive(@Param('id', ParseUUIDPipe) id: string) {
+  return this.restaurantService.toggleActive(id);
+}
+
+
   }
   
   

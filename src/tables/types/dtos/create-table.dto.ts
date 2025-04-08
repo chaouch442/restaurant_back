@@ -1,17 +1,22 @@
+import { IsEnum, IsInt, IsString, Min } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
-import { IsString, IsInt, IsEnum, Min } from 'class-validator';
+import { TableStatus } from 'src/tables/enums/status.enums';
+import { ViewType } from 'src/tables/enums/view.enums';
 
 export class CreateTableDto {
-  @ApiProperty() 
+  @ApiProperty()
   @IsInt()
   @Min(1, { message: 'Le nombre de chaises doit être au moins 1' })
   numChaises: number;
-  
-@ApiProperty() 
-  @IsString()
-  view: string;
 
-@ApiProperty() 
-  @IsEnum(['available', 'occupied'], { message: 'Le status doit être soit "available" soit "occupied"' })
-  status: 'available' | 'occupied';
+  @ApiProperty({ enum: ViewType })
+  @IsEnum(ViewType, {
+    message: 'La vue doit être "fenetre", "mer" ou "classique"',
+  })
+  view: ViewType;
+  @ApiProperty({ enum: TableStatus })
+  @IsEnum(TableStatus, {
+    message: 'Le status doit être soit "available" soit "occupied"',
+  })
+  status: TableStatus;
 }

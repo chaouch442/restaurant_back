@@ -1,11 +1,10 @@
 import { Entity, PrimaryGeneratedColumn, Column, OneToMany, JoinColumn } from 'typeorm';
-import { PlatEntity } from '../../plats/entities/plat.entity';
-import { IMen } from '../interfaces/menu.interface';
-import { ApiProperty } from '@nestjs/swagger';
+import { Plat } from '../../plats/entities/plat.entity';
+
 
 
 @Entity()
-export class MenuEntity{
+export class MenuRestaurant{
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
@@ -16,8 +15,8 @@ export class MenuEntity{
   datecreation: string; 
 
 
-  @OneToMany(() => PlatEntity, (plat) => plat.menu)
-  plats: PlatEntity[];
+  @OneToMany(() => Plat, (plat) => plat.menu)
+  plats: Plat[];
   
   
 

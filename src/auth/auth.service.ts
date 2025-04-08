@@ -6,8 +6,8 @@ import { UserService } from '../user/user.service';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
 import * as crypto from 'crypto';
-import { UserEntity } from '../user/entities/user.entity';
-import { RoleEntity } from './entities/role.entity';
+import { User } from '../user/entities/user.entity';
+import { RoleUser } from './entities/role.entity';
 import { LoginDto } from './types/dtos/login.dto';
 import { MailService } from '../services/mail.service';
 
@@ -22,11 +22,11 @@ export class AuthService {
     private readonly jwtService: JwtService,
     private readonly mailService: MailService,
     
-    @InjectRepository(UserEntity)
-    private readonly userRepository: Repository<UserEntity>, 
+    @InjectRepository(User)
+    private readonly userRepository: Repository<User>, 
 
-    @InjectRepository(RoleEntity)
-    private readonly roleRepository: Repository<RoleEntity>, 
+    @InjectRepository(RoleUser)
+    private readonly roleRepository: Repository<RoleUser>, 
   ) {}
 
 
@@ -44,7 +44,7 @@ export class AuthService {
     user.resetTokenExpires = expires;
     await this.userService.save(user);
   
-    const resetLink = `http://localhost:4200/reset-password/${token}`;
+    const resetLink = `http://localhost:4200/auth/reset-password/${token}`;
     await this.mailService.sendMail({
       to: user.email,
       subject: 'Réinitialisation de mot de passe',

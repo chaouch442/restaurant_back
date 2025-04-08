@@ -1,19 +1,20 @@
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { UserEntity } from '../user/entities/user.entity';
-import { RoleEntity } from '../auth/entities/role.entity';
+
 import { RoleRepository } from 'src/auth/repositories/role.repository';
 import { CreateUserDto } from './types/dtos/create.user.dto';
 import * as bcrypt from 'bcrypt';
 import { UpdateUserDto } from './types/dtos/update.user.dto';
 import { UserRepository } from './repositories/user.repository';
+import { RoleUser } from 'src/auth/entities/role.entity';
+import { User } from './entities/user.entity';
 
 @Injectable()
 export class UserService {
   constructor(
-        @InjectRepository(UserEntity)
+        @InjectRepository(User)
         private readonly userRepository: UserRepository,
-        @InjectRepository(RoleEntity)
+        @InjectRepository(RoleUser)
         private readonly roleRepository: RoleRepository,
        
     ) {}
@@ -27,10 +28,7 @@ export class UserService {
       return password;
     }
 
-   // async create(userData) {
-        //const user = this.userRepository.create(userData);
-        //return this.userRepository.save(user);
-    //}
+  
 
     async findByEmail(email: string) {
       console.log('Recherche de l\'utilisateur avec email :', email);
@@ -41,11 +39,11 @@ export class UserService {
  
       return user;
   }
-  async findByResetToken(token: string): Promise<UserEntity | null> {
+  async findByResetToken(token: string): Promise<User | null> {
     return this.userRepository.findOne({ where: { resetToken: token } });
   }
   
-  async save(user: UserEntity): Promise<UserEntity> {
+  async save(user: User): Promise<User> {
     return this.userRepository.save(user);
   }
     async assignRoleToUser(userId: string, roleName: string) {

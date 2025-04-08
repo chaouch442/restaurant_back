@@ -1,11 +1,11 @@
 import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, ManyToMany } from 'typeorm';
-import { MenuEntity } from '../../menu/entities/menu.entity';
 import { MealTime } from '../enums/meal-time.enum';
-import { ReservationEntity } from 'src/reservations/entities/reservation.entity';
-import { ApiProperty } from '@nestjs/swagger';
+import { MenuRestaurant } from 'src/menu/entities/menu.entity';
+import { ReservationTable } from 'src/reservations/entities/reservation.entity';
+
 
 @Entity()
-export class PlatEntity {
+export class Plat{
   @PrimaryGeneratedColumn()
   id: string;
  
@@ -21,13 +21,13 @@ export class PlatEntity {
   @Column({ type: 'enum', enum: MealTime }) 
   mealTime: MealTime;
 
-  @ManyToOne(() => MenuEntity, (menu) => menu.plats, {
-    onDelete: 'CASCADE', // optionnel
+  @ManyToOne(() => MenuRestaurant, (menu) => menu.plats, {
+    onDelete: 'CASCADE',
   })
-  menu: MenuEntity;
+  menu: MenuRestaurant;
   
-  @ManyToMany(() => ReservationEntity, (reservation) => reservation.plats)
-  reservations: ReservationEntity[];
+  @ManyToMany(() => ReservationTable, (reservation) => reservation.plats)
+  reservations: ReservationTable[];
   
 
   

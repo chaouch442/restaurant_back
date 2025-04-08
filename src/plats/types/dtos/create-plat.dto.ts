@@ -14,6 +14,6 @@ export class CreatePlatDto {
   @IsNotEmpty()
   image: string;
   @IsNotEmpty()
-  @IsEnum(MealTime)  // ✅ Vérifie que `mealTime` est valide
+  @IsEnum(MealTime)  
   mealTime: MealTime;
 }

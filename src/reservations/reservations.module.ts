@@ -1,20 +1,24 @@
 import { Module } from '@nestjs/common';
 import { ReservationController } from './reservations.controller';
 import { ReservationsService } from './reservations.service';
-import { ReservationEntity } from './entities/reservation.entity';
+import {  ReservationTable } from './entities/reservation.entity';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { RestaurantEntity } from 'src/restaurants/entities/restaurant.entity';
-import { TableEntity } from 'src/tables/entities/table.entity';
-import { UserEntity } from 'src/user/entities/user.entity';
+import { Restaurant } from 'src/restaurants/entities/restaurant.entity';
+import {  TableRestaurant } from 'src/tables/entities/table.entity';
+import { User } from 'src/user/entities/user.entity';
 import { ReservationRepository } from './repositories/reservation.repository';
-import { UserModule } from 'src/user/user.module';
-import { PlatEntity } from 'src/plats/entities/plat.entity';
-import { MenuEntity } from 'src/menu/entities/menu.entity';
+import { Plat} from 'src/plats/entities/plat.entity';
+import {  MenuRestaurant } from 'src/menu/entities/menu.entity';
+import { ReservationTimeService } from './reservation-time/reservation-time.service';
+import { ReservationTimeController } from './reservation-time/reservation-time.controller';
+import { ReservationTime } from './entities/reservation-time.entity';
+import { ReservationTimeRepository } from './repositories/reservation-time.repository';
+import { RestaurantModule } from 'src/restaurants/restaurant.module';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([ReservationEntity, RestaurantEntity, TableEntity,UserEntity,MenuEntity,PlatEntity])],
-  controllers: [ReservationController],
-  providers: [ReservationsService,ReservationRepository],
-  exports: [ReservationsService,ReservationRepository],
+  imports: [TypeOrmModule.forFeature([ReservationTable, Restaurant, TableRestaurant,User,MenuRestaurant,Plat,ReservationTime]), RestaurantModule,],
+  controllers: [ReservationController, ReservationTimeController],
+  providers: [ReservationsService,ReservationRepository, ReservationTimeService, ReservationTimeRepository],
+  exports: [ReservationsService,ReservationRepository,ReservationTimeService,ReservationTimeRepository],
 })
 export class ReservationsModule {}

@@ -3,15 +3,12 @@ import { ApiTags } from '@nestjs/swagger';
 import { ReservationsService } from './reservations.service';
 import { CreateReservationDto } from './types/dtos/create-reservation.dto';
 import { RolesGuard } from 'src/auth/guards/roles.guard';
-import { Roles } from 'src/auth/decorators/roles.decorator';
-import{Request}from '@nestjs/common';
-import { AuthGuard } from '@nestjs/passport';
-import { User } from 'src/user/decorators/user.decorator';
-import { UserEntity } from 'src/user/entities/user.entity';
+import { userId } from 'src/user/decorators/user.decorator';
 import { JwtAuthGuard } from 'src/auth/guards/auth.guard';
 import { UpdateReservationDto } from './types/dtos/update-reservation.dto';
 import { InjectRepository } from '@nestjs/typeorm';
-import { ReservationEntity } from './entities/reservation.entity';
+import { ReservationTable } from './entities/reservation.entity';
+import { User } from 'src/user/entities/user.entity';
 
 @ApiTags('reservation')
 @Controller('reservations')
@@ -19,7 +16,7 @@ import { ReservationEntity } from './entities/reservation.entity';
 export class ReservationController {
   
     constructor(private readonly reservationService: ReservationsService,
-      @InjectRepository(ReservationEntity)
+      @InjectRepository(ReservationTable)
       private readonly reservationRepository,
     ) {}
 
@@ -27,7 +24,7 @@ export class ReservationController {
     @Post()
     async createReservation(
       @Body() createReservationDto: CreateReservationDto,
-      @User() user: UserEntity,
+      @userId() user: User,
     )
     {
       console.log("test+++++++++++++++++++++++")
@@ -46,13 +43,13 @@ export class ReservationController {
   }
    @Patch(':id')
    @UseGuards(JwtAuthGuard)
-         async updateReservation(@Param('id') id: string, @Body() updatereservationDto :UpdateReservationDto,@User() user: UserEntity,) {
+         async updateReservation(@Param('id') id: string, @Body() updatereservationDto :UpdateReservationDto,@userId() user: User,) {
        console.log('updateReservationDto:', updatereservationDto);
         return this.reservationService.updateReservation(id, updatereservationDto,user);
         }
       @Delete(':id')
      @UseGuards(JwtAuthGuard)
-      async deleteReservation(@Param('id', ParseUUIDPipe) id: string, @User() user: UserEntity,) {
+      async deleteReservation(@Param('id', ParseUUIDPipe) id: string, @userId() user: User,) {
           return this.reservationService.deleteReservation(id,user);
       }
 

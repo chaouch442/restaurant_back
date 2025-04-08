@@ -1,47 +1,70 @@
-import { BadRequestException, Body, ForbiddenException, Injectable, NotFoundException, Param, Patch, Post, UnauthorizedException } from '@nestjs/common';
+import { BadRequestException, Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common';
 import { ReservationRepository } from './repositories/reservation.repository';
 import { CreateReservationDto } from './types/dtos/create-reservation.dto';
 import { InjectRepository } from '@nestjs/typeorm';
-import { ReservationEntity } from './entities/reservation.entity';
-import { RestaurantEntity } from 'src/restaurants/entities/restaurant.entity';
 import { RestaurantRepository } from 'src/restaurants/repositories/restaurant.repository';
-import { TableEntity } from 'src/tables/entities/table.entity';
 import { TableRepository } from 'src/tables/repositories/table.repository';
-import { MenuEntity } from 'src/menu/entities/menu.entity';
-import { MenuRepository } from 'src/menu/repositories/menu.repository';
-import { PlatEntity } from 'src/plats/entities/plat.entity';
-import * as QRCode from 'qrcode';
+import { Plat } from 'src/plats/entities/plat.entity';
 import { platRepository } from 'src/plats/repositories/plat.repository';
 import { getMealTime } from 'src/plats/utils/getMealTime';
 import { UserRepository } from 'src/user/repositories/user.repository';
-import { UserEntity } from 'src/user/entities/user.entity';
-import { In } from 'typeorm';
+import { In, LessThanOrEqual } from 'typeorm';
 import { UpdateReservationDto } from './types/dtos/update-reservation.dto';
+import { Cron, CronExpression } from '@nestjs/schedule';
+import { TableStatus } from 'src/tables/enums/status.enums';
+import { ReservationStatus } from './enums/reservatin.enums';
+import { TableRestaurant } from 'src/tables/entities/table.entity';
+import { User } from 'src/user/entities/user.entity';
+import { ReservationTable } from './entities/reservation.entity';
+import { Restaurant } from 'src/restaurants/entities/restaurant.entity';
 
 @Injectable()
 export class ReservationsService {
 
   
   constructor(
-    @InjectRepository(RestaurantEntity)
+    @InjectRepository(Restaurant)
     private readonly restaurantRepository: RestaurantRepository,
 
-    @InjectRepository(TableEntity)
+    @InjectRepository(TableRestaurant)
     private readonly tableRepository: TableRepository,
 
-    @InjectRepository(UserEntity)
+    @InjectRepository(User)
     private readonly userRepository: UserRepository,
 
-    @InjectRepository(ReservationEntity)
+    @InjectRepository(ReservationTable)
     private readonly reservationRepository: ReservationRepository,
 
-    @InjectRepository(MenuEntity)
-    private readonly   menuRepository : MenuRepository,
-
-    @InjectRepository(PlatEntity)
+    @InjectRepository(Plat)
     private readonly   platrepository : platRepository,
 
   ) {}
+
+  @Cron(CronExpression.EVERY_MINUTE)
+  async updateReservationStatus() {
+    const now = new Date();
+
+    const finishedReservations = await this.reservationRepository.find({
+      where: {
+        reservationDateTime: LessThanOrEqual(now),
+        status: ReservationStatus.ACTIVE,
+      },
+      relations: ['table'],
+    });
+
+    for (const reservation of finishedReservations) {
+      if (reservation.table) {
+        reservation.table.status = TableStatus.AVAILABLE;
+        await this.tableRepository.save(reservation.table);
+      }
+
+      reservation.status = ReservationStatus.FINISHED;
+      await this.reservationRepository.save(reservation);
+    }
+  }
+  
+
+
 
    async createReservation(createReservationDto: CreateReservationDto, user) {
    
@@ -56,21 +79,10 @@ export class ReservationsService {
      const connectedUser = await this.userRepository.findOneBy({ id:user.userId });
     if (!connectedUser) throw new NotFoundException('user not found');
     
-  //    const mealTime = getMealTime(reservationDateTime); 
 
-    
-  //   const plats = await this.platrepository.findBy({
-  //    id: In(platIds),
-  //    mealTime,
-  //  });
-    
-  //  const invalidPlats = plats.filter((plat) => plat.mealTime !== mealTime);
-  //  if (invalidPlats.length > 0) {
-  //    throw new BadRequestException(`Certains plats ne correspondent pas au type de repas: ${mealTime}`);
-  //  }
   const mealTime = getMealTime(reservationDateTime);
 
-let plats: PlatEntity[] = [];
+let plats: Plat[] = [];
 
 if (platIds && platIds.length > 0) {
   plats = await this.platrepository.findBy({
@@ -94,10 +106,9 @@ if (invalidPlats.length > 0) {
       user:connectedUser,
        plats,
     });
-    const qrContent = `reservation:${reservation.id}`; // ou un lien vers un endpoint /validate
+   
 
-// ⬇ Générer le QR code en base64
-     reservation.qrCode = await QRCode.toDataURL(qrContent);
+
     return this.reservationRepository.save(reservation);
   
   
@@ -124,7 +135,7 @@ async getReservation() {
 
 
 
-async updateReservation(id: string, updateReservationDto: UpdateReservationDto,user: UserEntity) {
+async updateReservation(id: string, updateReservationDto: UpdateReservationDto,user: User) {
   const reservation = await this.reservationRepository.findOneBy({ id });
 
   if (!reservation){
@@ -138,7 +149,7 @@ async updateReservation(id: string, updateReservationDto: UpdateReservationDto,u
   return await this.reservationRepository.save(reservation);
 }
 
-async deleteReservation(id: string,user: UserEntity) {
+async deleteReservation(id: string,user: User) {
   const reservation = await this.reservationRepository.findOneBy({ id });
   
   if (!reservation) {

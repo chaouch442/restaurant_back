@@ -4,9 +4,7 @@ import { PassportModule } from '@nestjs/passport';
 import { JwtModule, JwtService } from '@nestjs/jwt';
 import { AuthService } from './auth.service';
 import { AuthController } from './auth.controller';
-import { UserEntity } from '../user/entities/user.entity';
-import { RoleEntity } from './entities/role.entity';
-
+import { User} from '../user/entities/user.entity';
 import { UserService } from '../user/user.service'; 
 import { MailModule } from '../services/mail.module';
 import { UserRepository } from '../user/repositories/user.repository';
@@ -14,10 +12,11 @@ import { JwtStrategy } from './strategies/jwt.strategy';
 import { RolesGuard } from './guards/roles.guard';
 import { RoleRepository } from './repositories/role.repository';
 import { jwtConstants } from './constant';
+import { RoleUser } from './entities/role.entity';
 
 @Module({
   imports: [
-   TypeOrmModule.forFeature([UserEntity, RoleEntity]),
+   TypeOrmModule.forFeature([User, RoleUser]),
     PassportModule, 
     
     JwtModule.register({

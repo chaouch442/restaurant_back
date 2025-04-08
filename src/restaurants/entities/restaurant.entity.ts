@@ -3,7 +3,7 @@ import { RestaurantStatus } from '../enums/status.enum';
 import { IRestaurant } from '../interfaces/restaurant.interface';
 
 @Entity()
-export class RestaurantEntity implements IRestaurant {
+export class Restaurant implements IRestaurant {
   @PrimaryGeneratedColumn('uuid')
   id: string;
   
@@ -28,6 +28,10 @@ export class RestaurantEntity implements IRestaurant {
     default: RestaurantStatus.FERME
   })
   status: RestaurantStatus;
+
+  @Column({ default: true })
+isActive: boolean;
+
   
   @CreateDateColumn()
   createdAt: Date; 

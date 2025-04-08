@@ -9,6 +9,7 @@ export class CreateMenuDto {
   @IsString()
   @IsNotEmpty()
   name: string;
+  @ApiProperty()
   @IsNotEmpty()
   @IsDateString()  
   datecreation: string;

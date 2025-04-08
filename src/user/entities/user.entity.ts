@@ -1,8 +1,8 @@
-import { RoleEntity } from 'src/auth/entities/role.entity';
+import { RoleUser } from 'src/auth/entities/role.entity';
 import { Entity,  Column,   PrimaryGeneratedColumn, ManyToOne } from 'typeorm';
 
 @Entity()
-export class UserEntity {
+export class User {
 @PrimaryGeneratedColumn()
   id: string;
 
@@ -27,8 +27,8 @@ export class UserEntity {
   resetTokenExpires: Date | null;
   
 
-  @ManyToOne(() => RoleEntity, (role) => role.user, { eager: true })
-role: RoleEntity;
+  @ManyToOne(() => RoleUser, (role) => role.user, { eager: true })
+role: RoleUser;
  
 
  

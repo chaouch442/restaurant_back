@@ -2,7 +2,7 @@ import { BadRequestException, Injectable, NotFoundException } from '@nestjs/comm
 import { RestaurantRepository } from './repositories/restaurant.repository';
 import { CreateRestaurantDto } from './types/dto/create-restaurant.dto';
 import { UpdateRestaurantDto } from './types/dto/update-restaurant.dto';
-import { ReservationRepository } from 'src/reservations/repositories/reservation.repository';
+import { RestaurantStatus } from './enums/status.enum';
 
 @Injectable()
 export class RestaurantService {
@@ -13,20 +13,49 @@ export class RestaurantService {
   ){}
 
   async getRestaurantById(id: string) {
-    const fetchedRestaurant = await this.RestaurantRepository.findOneBy( { id: id } );
-
+    const fetchedRestaurant = await this.RestaurantRepository.findOneBy({ id });
+  
     if (!fetchedRestaurant) {
-        throw new BadRequestException(`Restaurant with ID ${id} not found`);
+      throw new BadRequestException(`Restaurant with ID ${id} not found`);
     }
-
+  
+    if (fetchedRestaurant.hourly) {
+      const [start, end] = fetchedRestaurant.hourly.split('-');
+      const nowHour = new Date().getHours();
+  
+      const startHour = parseInt(start);
+      const endHour = parseInt(end);
+  
+      const isOpen = nowHour >= startHour && nowHour < endHour;
+      fetchedRestaurant.status = isOpen ? RestaurantStatus.OUVERT : RestaurantStatus.FERME;
+    }
+  
     return fetchedRestaurant;
+  }
+  
+
+
+
+async getRestaurant() {
+  const restaurants = await this.RestaurantRepository.find({
+    where: { isActive: true },
+  });
+
+
+  const nowHour = new Date().getHours();
+  for (const r of restaurants) {
+    if (r.hourly) {
+      const [start, end] = r.hourly.split('-');
+      const startHour = parseInt(start);
+      const endHour = parseInt(end);
+      const isOpen = nowHour >= startHour && nowHour < endHour;
+      r.status = isOpen ? RestaurantStatus.OUVERT : RestaurantStatus.FERME;
+    }
+  }
+
+  return restaurants;
 }
 
-
-
-  async getRestaurant() {
-    return this.RestaurantRepository.find();
-}
 
 
 
@@ -58,7 +87,29 @@ async updateRestaurant(id: string, updateRestaurantDto: UpdateRestaurantDto) {
   return await this.RestaurantRepository.save(restaurant);
 }
 
+async deactivateRestaurant(id: string) {
+  const restaurant = await this.RestaurantRepository.findOneBy({ id });
 
+  if (!restaurant) {
+    throw new NotFoundException(`Restaurant with ID ${id} not found`);
+  }
+
+  restaurant.isActive = false;
+  return await this.RestaurantRepository.save(restaurant);
+}
+async toggleActive(id: string) {
+  const restaurant = await this.RestaurantRepository.findOneBy({ id });
+
+  if (!restaurant) {
+    throw new NotFoundException(`Restaurant with ID ${id} not found`);
+  }
+
+  restaurant.isActive = !restaurant.isActive;
+
+  return this.RestaurantRepository.save(restaurant);
+}
+
+ 
 
 
 }
