@@ -6,7 +6,7 @@ import { ReservationTable } from 'src/reservations/entities/reservation.entity';
 
 @Entity()
 export class Plat{
-  @PrimaryGeneratedColumn()
+  @PrimaryGeneratedColumn('uuid')
   id: string;
  
   @Column()

@@ -10,7 +10,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { ReservationTable } from './entities/reservation.entity';
 import { User } from 'src/user/entities/user.entity';
 
-@ApiTags('reservation')
+@ApiTags('reservations')
 @Controller('reservations')
 @UseGuards(RolesGuard)
 export class ReservationController {

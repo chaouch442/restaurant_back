@@ -1,4 +1,4 @@
-import { IsEnum, IsInt, IsString, Min } from 'class-validator';
+import { IsEnum, IsInt, IsNumber, IsString, IsUUID, Min } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 import { TableStatus } from 'src/tables/enums/status.enums';
 import { ViewType } from 'src/tables/enums/view.enums';
@@ -19,4 +19,17 @@ export class CreateTableDto {
     message: 'Le status doit être soit "available" soit "occupied"',
   })
   status: TableStatus;
+
+
+  @ApiProperty()
+  @IsNumber()
+  row: number;
+
+  @ApiProperty()
+  @IsNumber()
+  col: number;
+
+  @ApiProperty()
+  @IsUUID()
+  blocId: string;
 }

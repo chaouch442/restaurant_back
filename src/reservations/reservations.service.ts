@@ -17,6 +17,10 @@ import { TableRestaurant } from 'src/tables/entities/table.entity';
 import { User } from 'src/user/entities/user.entity';
 import { ReservationTable } from './entities/reservation.entity';
 import { Restaurant } from 'src/restaurants/entities/restaurant.entity';
+import { SystemConfig } from 'src/config/entities/config.entity';
+import { SystemConfigRepository } from 'src/config/repositories/system-config.repository';
+import { ReservationTime } from './entities/reservation-time.entity';
+import { ReservationTimeRepository } from './repositories/reservation-time.repository';
 
 @Injectable()
 export class ReservationsService {
@@ -37,6 +41,11 @@ export class ReservationsService {
 
     @InjectRepository(Plat)
     private readonly   platrepository : platRepository,
+    @InjectRepository(SystemConfig)
+    private readonly   systemConfigRepository : SystemConfigRepository,
+
+    @InjectRepository(ReservationTime)
+    private readonly reservationTimeRepository: ReservationTimeRepository,
 
   ) {}
 
@@ -78,9 +87,42 @@ export class ReservationsService {
 
      const connectedUser = await this.userRepository.findOneBy({ id:user.userId });
     if (!connectedUser) throw new NotFoundException('user not found');
+ 
+  
+    const config = await this.systemConfigRepository.findOneBy({});
+    if (!config) throw new NotFoundException('System config not found');
     
-
+    const timeSlot = await this. reservationTimeRepository .findOne({
+      where: { id: createReservationDto.timeSlotId },
+    });
+    if (!timeSlot) throw new NotFoundException('Time slot not found');
+    
+  
+    
+//bech ye7seb 9adeh min mara bech ya3mel reo 
+    const pastReservationsCount = await this.reservationRepository.countBy({
+      restaurant: { id: restaurantId },
+      user: { id: user.userId }
+    });
+    
+    //fet nombre eno mayjech lil reservation
+    if (pastReservationsCount >= config.maxNoShowAllowed) {
+      throw new UnauthorizedException(
+        `لقد تجاوزت الحد الأقصى لعدد الغيابات، الرجاء الاتصال بصاحب المطعم لإعادة التفعيل.`
+      );
+    }
+    //3ando wa9et m7aded mta3 cancel
+    
+    const now = new Date();
+    const diffInMinutes = (new Date(reservationDateTime).getTime() - now.getTime()) / (1000 * 60);
+    if (diffInMinutes < config.maxCancelTimeBeforeReservation) {
+      throw new UnauthorizedException(` Impossible d’annuler la réservation dans les ${config.maxCancelTimeBeforeReservation} minutes`);
+    }
+    
   const mealTime = getMealTime(reservationDateTime);
+  if (!mealTime) {
+    throw new BadRequestException('Invalid meal time');
+  }
 
 let plats: Plat[] = [];
 
@@ -98,13 +140,16 @@ if (invalidPlats.length > 0) {
 }
 
      console.log(user.userId)
+
+
      const reservation = this.reservationRepository.create({
       customerName,
-      reservationDateTime,
+      reservationDateTime:timeSlot.startTime,
       restaurant,
        table,
       user:connectedUser,
        plats,
+       timeSlot
     });
    
 

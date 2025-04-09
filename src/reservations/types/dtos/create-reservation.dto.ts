@@ -25,4 +25,10 @@ export class CreateReservationDto {
   @ApiProperty() 
   @IsOptional()
 platIds: string[]; 
+
+
+@IsUUID()
+@ApiProperty() 
+  timeSlotId?: string;
+
 }

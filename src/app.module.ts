@@ -23,6 +23,10 @@ import { RoleUser } from './auth/entities/role.entity';
 import { User } from './user/entities/user.entity';
 import { Restaurant } from './restaurants/entities/restaurant.entity';
 import { Plat } from './plats/entities/plat.entity';
+import { BlocService } from './bloc/bloc.service';
+import { BlocController } from './bloc/bloc.controller';
+import { BlocModule } from './bloc/bloc.module';
+import { Bloc } from './bloc/entities/bloc.entity/bloc.entity';
 
 
 
@@ -39,13 +43,13 @@ import { Plat } from './plats/entities/plat.entity';
         username: 'postgres',
         password: '0000',
         database: 'restaurants',
-        entities: [Restaurant, User, RoleUser, TableRestaurant,MenuRestaurant,Plat, ReservationTable,ReservationTime,SystemConfig],
+        entities: [Restaurant, User, RoleUser, TableRestaurant,MenuRestaurant,Plat, ReservationTable,ReservationTime,SystemConfig,Bloc],
         synchronize: true,
         logging: true,
       }),
     }),
  
-    TypeOrmModule.forFeature([User, RoleUser, Restaurant,TableRestaurant,MenuRestaurant,Plat, ReservationTable,ReservationTime,SystemConfig]),
+    TypeOrmModule.forFeature([User, RoleUser, Restaurant,TableRestaurant,MenuRestaurant,Plat, ReservationTable,ReservationTime,SystemConfig,Bloc]),
     RestaurantModule,
     AuthModule,
     UserModule,
@@ -53,11 +57,12 @@ import { Plat } from './plats/entities/plat.entity';
     MenuModule,
     PlatsModule,
     ReservationsModule,
-    CustomConfigModule
+    CustomConfigModule,
+    BlocModule
   
    
   ],
-  controllers: [AppController, ModuleController],
-  providers: [AppService, PlatsService],
+  controllers: [AppController, ModuleController, BlocController],
+  providers: [AppService, PlatsService, BlocService],
 })
 export class AppModule {}

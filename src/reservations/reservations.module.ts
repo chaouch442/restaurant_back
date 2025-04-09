@@ -14,11 +14,13 @@ import { ReservationTimeController } from './reservation-time/reservation-time.c
 import { ReservationTime } from './entities/reservation-time.entity';
 import { ReservationTimeRepository } from './repositories/reservation-time.repository';
 import { RestaurantModule } from 'src/restaurants/restaurant.module';
+import { SystemConfig } from 'src/config/entities/config.entity';
+import { SystemConfigRepository } from 'src/config/repositories/system-config.repository';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([ReservationTable, Restaurant, TableRestaurant,User,MenuRestaurant,Plat,ReservationTime]), RestaurantModule,],
+  imports: [TypeOrmModule.forFeature([ReservationTable, Restaurant, TableRestaurant,User,MenuRestaurant,Plat,ReservationTime, SystemConfig]), RestaurantModule,],
   controllers: [ReservationController, ReservationTimeController],
-  providers: [ReservationsService,ReservationRepository, ReservationTimeService, ReservationTimeRepository],
-  exports: [ReservationsService,ReservationRepository,ReservationTimeService,ReservationTimeRepository],
+  providers: [ReservationsService,ReservationRepository, ReservationTimeService, ReservationTimeRepository,SystemConfigRepository],
+  exports: [ReservationsService,ReservationRepository,ReservationTimeService,ReservationTimeRepository,SystemConfigRepository],
 })
 export class ReservationsModule {}

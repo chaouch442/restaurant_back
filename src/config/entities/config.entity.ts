@@ -18,8 +18,6 @@ export class SystemConfig	{
   @Column({ default: 2 })
   maxReportAllowed: number;
 
-  @Column({ default: 7 })
-  banDurationDays: number;
 
   @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
   createdAt: Date;

@@ -1,9 +1,10 @@
-import {Controller,Get,Post,Patch,Delete,Param,Body,Query,} from '@nestjs/common';
+import {Controller,Get,Post,Patch,Delete,Param,Body,Query, UseGuards,} from '@nestjs/common';
 import { ReservationTimeService } from './reservation-time.service';
 import { CreateReservationTimeDto } from '../types/dtos/create-reservation-time.dto';
 import { UpdateReservationTimeDto } from '../types/dtos/update-reservation-time.dtos';
+import { RolesGuard } from 'src/auth/guards/roles.guard';
   
-  
+  @UseGuards(RolesGuard)
   @Controller('reservation-time')
   export class ReservationTimeController {
     constructor(

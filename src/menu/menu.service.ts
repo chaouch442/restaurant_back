@@ -6,6 +6,7 @@ import { CreateMenuDto } from './types/dtos/create-menu.dto';
 import { UpdateMenuDto } from './types/dtos/update-menu.dto';
 import { MealTime } from 'src/plats/enums/meal-time.enum';
 import { MenuRestaurant } from './entities/menu.entity';
+import { Plat } from 'src/plats/entities/plat.entity';
 
 @Injectable()
 export class MenuService {
@@ -15,12 +16,37 @@ export class MenuService {
   constructor(
     @InjectRepository(MenuRestaurant)
     private menuRepository: Repository<MenuRestaurant>,
+    @InjectRepository(Plat)
+    private platRepository: Repository<Plat>,
   ) {}
 
-  async createMenu(createMenuDto: CreateMenuDto){
-    const newMenu = this.menuRepository.create(createMenuDto);
-    return this.menuRepository.save(newMenu);
+  // async createMenu(createMenuDto: CreateMenuDto){
+  //   const newMenu = this.menuRepository.create(createMenuDto);
+  //   return this.menuRepository.save(newMenu);
+  // }
+  async createMenu(createMenuDto: CreateMenuDto) {
+    // نفصلو الـ plats على باقي البيانات
+    const { plats, ...menuData } = createMenuDto;
+  
+    // نعملو menu جديد
+    const newMenu = this.menuRepository.create(menuData);
+    const savedMenu = await this.menuRepository.save(newMenu);
+  
+    // نربطو كل plat بالـ menu الجديد
+    const platsWithMenu = plats.map((plat) => ({
+      ...plat,
+      menu: savedMenu, // الربط هنا
+    }));
+  
+    // نخزنو الـ plats المرتبطين بالـ menu
+    await this.platRepository.save(platsWithMenu); // تأكد أنك عامل Inject للـ platRepository
+  
+    return this.menuRepository.findOne({
+      where: { id: savedMenu.id },
+      relations: ['plats'],
+    });
   }
+  
 
   async getMenu() {
     return this.menuRepository.find({ relations: ['plats'] });

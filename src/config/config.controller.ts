@@ -9,7 +9,7 @@ import { UpdateSystemConfigDto } from './types/dtos/update-system-config.dto';
 @Controller('system-config')
 export class SystemConfigController {
   constructor(private readonly systemConfigService: SystemConfigService) {
-    console.log('✅ SystemConfigController loaded');
+    console.log(' SystemConfigController loaded');
 
   }
 

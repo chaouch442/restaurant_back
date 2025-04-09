@@ -18,7 +18,5 @@ export class CreateSystemConfigDto {
   @IsInt()
   maxReportAllowed: number;
 
-  @ApiProperty({ default: 7 }) // بالأيام
-  @IsInt()
-  banDurationDays: number;
+  
 }
