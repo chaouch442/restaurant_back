@@ -1,7 +1,9 @@
-import { IsEnum, IsInt, IsNumber, IsString, IsUUID, Min } from 'class-validator';
+import { IsEnum, IsInt, IsNumber, IsString, IsUUID, Min, ValidateNested } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 import { TableStatus } from 'src/tables/enums/status.enums';
 import { ViewType } from 'src/tables/enums/view.enums';
+import { Type } from 'class-transformer';
+import { CreateBlocDto } from 'src/bloc/types/dtos/create-bloc.dto';
 
 export class CreateTableDto {
   @ApiProperty()
@@ -9,11 +11,7 @@ export class CreateTableDto {
   @Min(1, { message: 'Le nombre de chaises doit être au moins 1' })
   numChaises: number;
 
-  @ApiProperty({ enum: ViewType })
-  @IsEnum(ViewType, {
-    message: 'La vue doit être "fenetre", "mer" ou "classique"',
-  })
-  view: ViewType;
+ 
   @ApiProperty({ enum: TableStatus })
   @IsEnum(TableStatus, {
     message: 'Le status doit être soit "available" soit "occupied"',
@@ -30,6 +28,7 @@ export class CreateTableDto {
   col: number;
 
   @ApiProperty()
-  @IsUUID()
-  blocId: string;
+  @ValidateNested()
+  @Type(() => CreateBlocDto)
+  bloc: CreateBlocDto;
 }

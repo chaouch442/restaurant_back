@@ -1,6 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Entity, PrimaryGeneratedColumn, Column, ManyToOne } from 'typeorm';
-import {  ViewType } from '../enums/view.enums';
 import { TableStatus } from '../enums/status.enums';
 import { Bloc } from 'src/bloc/entities/bloc.entity/bloc.entity';
 
@@ -11,9 +10,9 @@ export class TableRestaurant{
 @ApiProperty()
   @Column()
   numChaises: number;
-  @ApiProperty({ enum: ViewType })
-  @Column()
-  view: ViewType;
+  // @ApiProperty({ enum: ViewType })
+  // @Column()
+  // view: ViewType;
  
  @ApiProperty({ enum: TableStatus })
   @Column()

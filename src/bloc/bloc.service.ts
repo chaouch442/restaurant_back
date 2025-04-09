@@ -12,7 +12,7 @@ export class BlocService {
   constructor(@InjectRepository(Bloc) private blocRepository: BlocRepository) {}
 
   create( createBlocDto: CreateBlocDto) {
-    const { name, etage,view } =  createBlocDto;
+    const { name, etage ,view} =  createBlocDto;
     const newBloc= this.blocRepository.create({ name, etage,view });
     return this.blocRepository.save(newBloc);
   }

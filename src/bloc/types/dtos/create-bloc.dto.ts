@@ -11,8 +11,8 @@ export class CreateBlocDto {
   @IsString()
   etage: string;
 
-  @ApiProperty({ enum: ViewType }) 
-  @IsEnum(ViewType) 
+  @ApiProperty({ enum: ViewType })
+  @IsEnum(ViewType)
   view: ViewType;
   
   }

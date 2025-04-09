@@ -1,5 +1,6 @@
 import { IBloc } from "src/bloc/interfaces/bloc.interface";
 import { TableRestaurant } from "src/tables/entities/table.entity";
+import { ViewType } from "src/tables/enums/view.enums";
 import { Column, CreateDateColumn, Entity, OneToMany, PrimaryGeneratedColumn, UpdateDateColumn } from "typeorm";
 
 @Entity()
@@ -15,7 +16,8 @@ export class Bloc  implements IBloc{
   etage: string;
 
   @Column()
-  view: string;
+view: ViewType; 
+
 
   @OneToMany(() => TableRestaurant, (table) => table.bloc)
   tables: TableRestaurant[];

@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException} from '@nestjs/common';
+import { BadRequestException, Injectable, NotFoundException} from '@nestjs/common';
 import { TableRepository } from './repositories/table.repository';
 import { InjectRepository } from '@nestjs/typeorm';
 import { CreateTableDto } from './types/dtos/create-table.dto';
@@ -6,6 +6,7 @@ import { UpdateTableDto } from './types/update-table.dto';
 import { TableRestaurant } from './entities/table.entity';
 import { Bloc } from 'src/bloc/entities/bloc.entity/bloc.entity';
 import { BlocRepository } from 'src/bloc/repositories/bloc.repository';
+import { ViewType } from './enums/view.enums';
 
 
 @Injectable()
@@ -19,19 +20,29 @@ export class TablesService {
           
   
           async createTable(createTableDto: CreateTableDto) {
-            const { numChaises, view, status, row, col, blocId } = createTableDto;
-            const bloc = await this.blocRepository.findOne({ where: { id: blocId } });
+            const { numChaises, status, row, col, bloc } = createTableDto;
+            const blocFound = await this.blocRepository.findOneBy({
+             
+                name: bloc.name,
+                etage: bloc.etage,
+              
+            });
+            
+            if (!blocFound) {
+              throw new BadRequestException('Bloc non trouvé');
+            }
+            
             const newTable = this.TableRepository.create({
               numChaises,
               status,
               row,
-              col,
-              blocId,
-              view
+              col,   
+              blocId: blocFound.id,   
             });
             
-          return this.TableRepository.save(newTable);
+            
           }
+
           async getTable(){
             return this.TableRepository.find();
           }
