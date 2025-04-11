@@ -1,4 +1,4 @@
-import { IsString, IsNotEmpty, IsUrl, IsEnum } from 'class-validator';
+import { IsString, IsNotEmpty, IsUrl, IsEnum, IsOptional } from 'class-validator';
 import { MealTime } from 'src/plats/enums/meal-time.enum';
 
 export class CreatePlatDto {
@@ -10,9 +10,10 @@ export class CreatePlatDto {
   @IsNotEmpty()
   type: string;
 
-  @IsUrl()
-  @IsNotEmpty()
-  image: string;
+  @IsOptional()
+  @IsString() 
+  image?: string;
+
   @IsNotEmpty()
   @IsEnum(MealTime)  
   mealTime: MealTime;

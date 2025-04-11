@@ -97,17 +97,17 @@ async deactivateRestaurant(id: string) {
   restaurant.isActive = false;
   return await this.RestaurantRepository.save(restaurant);
 }
-async toggleActive(id: string) {
-  const restaurant = await this.RestaurantRepository.findOneBy({ id });
+// async toggleActive(id: string) {
+//   const restaurant = await this.RestaurantRepository.findOneBy({ id });
 
-  if (!restaurant) {
-    throw new NotFoundException(`Restaurant with ID ${id} not found`);
-  }
+//   if (!restaurant) {
+//     throw new NotFoundException(`Restaurant with ID ${id} not found`);
+//   }
 
-  restaurant.isActive = !restaurant.isActive;
+//   restaurant.isActive = !restaurant.isActive;
 
-  return this.RestaurantRepository.save(restaurant);
-}
+//   return this.RestaurantRepository.save(restaurant);
+// }
 
  
 

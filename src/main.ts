@@ -3,7 +3,7 @@ import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 import { AppModule } from './app.module';
 import {  ConfigService } from '@nestjs/config';
 import { ValidationPipe } from '@nestjs/common';
-import * as dotenv from 'dotenv';
+import * as bodyParser from 'body-parser';
 
 
 async function bootstrap() {
@@ -15,7 +15,9 @@ async function bootstrap() {
       forbidNonWhitelisted: true, 
     }),
   );
-  
+  app.use(bodyParser.json({ limit: '10mb' }));
+app.use(bodyParser.urlencoded({ limit: '10mb', extended: true }));
+
   const configService = app.get(ConfigService);
   const config = new DocumentBuilder()
   

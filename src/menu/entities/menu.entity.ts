@@ -15,7 +15,9 @@ export class MenuRestaurant{
   datecreation: string; 
 
 
-  @OneToMany(() => Plat, (plat) => plat.menu)
+  @OneToMany(() => Plat, (plat) => plat.menu, {
+    cascade: true,
+  })
   plats: Plat[];
   
   

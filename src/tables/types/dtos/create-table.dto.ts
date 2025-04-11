@@ -26,9 +26,8 @@ export class CreateTableDto {
   @ApiProperty()
   @IsNumber()
   col: number;
-
   @ApiProperty()
-  @ValidateNested()
-  @Type(() => CreateBlocDto)
-  bloc: CreateBlocDto;
+  @IsString()
+  blocId: string;
+  
 }

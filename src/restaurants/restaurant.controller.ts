@@ -47,11 +47,11 @@ export class RestaurantController {
 async deactivateRestaurant(@Param('id', ParseUUIDPipe) id: string) {
   return this.restaurantService.deactivateRestaurant(id);
 }
-@Patch(':id/toggle-active')
-@Roles('admin')
-async toggleRestaurantActive(@Param('id', ParseUUIDPipe) id: string) {
-  return this.restaurantService.toggleActive(id);
-}
+// @Patch(':id/toggle-active')
+// @Roles('admin')
+// async toggleRestaurantActive(@Param('id', ParseUUIDPipe) id: string) {
+//   return this.restaurantService.toggleActive(id);
+// }
 
 
   }

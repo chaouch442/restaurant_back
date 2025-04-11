@@ -15,8 +15,10 @@ export class Plat{
   @Column()
   type: string;
 
-  @Column()
+  @Column({ type: 'text', nullable: true })
   image: string;
+  
+
  
   @Column({ type: 'enum', enum: MealTime }) 
   mealTime: MealTime;

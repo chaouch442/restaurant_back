@@ -20,14 +20,10 @@ export class TablesService {
           
   
           async createTable(createTableDto: CreateTableDto) {
-            const { numChaises, status, row, col, bloc } = createTableDto;
-            const blocFound = await this.blocRepository.findOneBy({
-             
-                name: bloc.name,
-                etage: bloc.etage,
-              
-            });
-            
+            const { numChaises, status, row, col,  blocId } = createTableDto;
+            const blocFound = await this.blocRepository.findOneBy( { id:  blocId },
+            );
+          
             if (!blocFound) {
               throw new BadRequestException('Bloc non trouvé');
             }
@@ -39,7 +35,7 @@ export class TablesService {
               col,   
               blocId: blocFound.id,   
             });
-            
+            return this.TableRepository.save( newTable)
             
           }
 
