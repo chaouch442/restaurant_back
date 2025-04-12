@@ -1,9 +1,7 @@
 import { IsEnum, IsInt, IsNumber, IsString, IsUUID, Min, ValidateNested } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 import { TableStatus } from 'src/tables/enums/status.enums';
-import { ViewType } from 'src/tables/enums/view.enums';
-import { Type } from 'class-transformer';
-import { CreateBlocDto } from 'src/bloc/types/dtos/create-bloc.dto';
+import { ReservationTable } from 'src/reservations/entities/reservation.entity';
 
 export class CreateTableDto {
   @ApiProperty()
@@ -29,5 +27,8 @@ export class CreateTableDto {
   @ApiProperty()
   @IsString()
   blocId: string;
+
+
+
   
 }

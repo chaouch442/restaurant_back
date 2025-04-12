@@ -33,8 +33,9 @@ constructor(private readonly tableService: TablesService) {}
   @Roles('manager')
   @Delete(':id')
   async deleteTable(@Param('id') id: string) {
-    return this.tableService.deleteTable(id);
+    return this.tableService.delete(id);
   }
+  
   }
 
 

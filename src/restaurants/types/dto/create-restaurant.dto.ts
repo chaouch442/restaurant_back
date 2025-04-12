@@ -19,13 +19,21 @@ export class CreateRestaurantDto {
   @IsNotEmpty()
   @IsString()
  phone: string;
+ 
   @ApiProperty()
 @IsNotEmpty()
 @IsString()
 hourly: string;
 
-  @ApiProperty({ enum: RestaurantStatus, required: false })
-  @IsOptional()
-  @IsEnum(RestaurantStatus, { message: "status must be 'ouvert' or 'ferme'" })
-  status?: RestaurantStatus;
+
+@IsBoolean()
+@IsOptional() // optionnel
+@ApiProperty({ required: false })
+isActive?: boolean;
+
+
+  // @ApiProperty({ enum: RestaurantStatus, required: false })
+  // @IsOptional()
+  // @IsEnum(RestaurantStatus, { message: "status must be 'ouvert' or 'ferme'" })
+  // status?: RestaurantStatus;
 }

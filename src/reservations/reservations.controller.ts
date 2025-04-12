@@ -12,7 +12,7 @@ import { User } from 'src/user/entities/user.entity';
 
 @ApiTags('reservations')
 @Controller('reservations')
-@UseGuards(RolesGuard)
+ @UseGuards(RolesGuard)
 export class ReservationController {
   
     constructor(private readonly reservationService: ReservationsService,

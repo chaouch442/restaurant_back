@@ -12,7 +12,7 @@ import { In, LessThanOrEqual } from 'typeorm';
 import { UpdateReservationDto } from './types/dtos/update-reservation.dto';
 import { Cron, CronExpression } from '@nestjs/schedule';
 import { TableStatus } from 'src/tables/enums/status.enums';
-import { ReservationStatus } from './enums/reservatin.enums';
+import { ReservationStatus } from './enums/reservation.enums';
 import { TableRestaurant } from 'src/tables/entities/table.entity';
 import { User } from 'src/user/entities/user.entity';
 import { ReservationTable } from './entities/reservation.entity';

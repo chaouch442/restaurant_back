@@ -1,3 +1,4 @@
+import { BlocStatus } from "src/bloc/enums/status.enum";
 import { IBloc } from "src/bloc/interfaces/bloc.interface";
 import { TableRestaurant } from "src/tables/entities/table.entity";
 import { ViewType } from "src/tables/enums/view.enums";
@@ -16,10 +17,16 @@ export class Bloc  implements IBloc{
   etage: string;
 
   @Column()
-view: ViewType; 
+ view: ViewType; 
+
+ @Column({ default: 'true' }) 
+
+ status:BlocStatus;
 
 
-  @OneToMany(() => TableRestaurant, (table) => table.bloc)
+  @OneToMany(() => TableRestaurant, (table) => table.bloc, {
+    cascade: true,
+  })
   tables: TableRestaurant[];
 
   @CreateDateColumn()

@@ -1,7 +1,8 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { Entity, PrimaryGeneratedColumn, Column, ManyToOne } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, OneToMany } from 'typeorm';
 import { TableStatus } from '../enums/status.enums';
 import { Bloc } from 'src/bloc/entities/bloc.entity/bloc.entity';
+import { ReservationTable } from 'src/reservations/entities/reservation.entity';
 
 @Entity()
 export class TableRestaurant{
@@ -10,10 +11,7 @@ export class TableRestaurant{
 @ApiProperty()
   @Column()
   numChaises: number;
-  // @ApiProperty({ enum: ViewType })
-  // @Column()
-  // view: ViewType;
- 
+
  @ApiProperty({ enum: TableStatus })
   @Column()
   status: TableStatus;
@@ -25,10 +23,10 @@ export class TableRestaurant{
   col: number;
   
 
+  
   @ManyToOne(() => Bloc, (bloc) => bloc.tables, { eager: true })
   bloc: Bloc;
 
-@Column({ nullable: true })
-blocId: string;
+
 
 }

@@ -59,11 +59,23 @@ async getRestaurant() {
 
 
 
-  async createRestaurant( createAuthorDto: CreateRestaurantDto) {
+async createRestaurant(dto: CreateRestaurantDto) {
+  const [start, end] = dto.hourly.split('-');
+  const nowHour = new Date().getHours();
+  const startHour = parseInt(start);
+  const endHour = parseInt(end);
+  const isOpen = nowHour >= startHour && nowHour < endHour;
 
-    return this.RestaurantRepository.save(
-this.RestaurantRepository.create(createAuthorDto))
+  const restaurant = this.RestaurantRepository.create({
+    ...dto,
+    status: isOpen ? RestaurantStatus.OUVERT : RestaurantStatus.FERME
+  });
+
+  return this.RestaurantRepository.save(restaurant);
 }
+
+
+
 async deleteRestaurant(id: string) {
   const restaurant = await this.RestaurantRepository.findOneBy({ id });
   
@@ -97,17 +109,17 @@ async deactivateRestaurant(id: string) {
   restaurant.isActive = false;
   return await this.RestaurantRepository.save(restaurant);
 }
-// async toggleActive(id: string) {
-//   const restaurant = await this.RestaurantRepository.findOneBy({ id });
+async toggleActive(id: string) {
+  const restaurant = await this.RestaurantRepository.findOneBy({ id });
 
-//   if (!restaurant) {
-//     throw new NotFoundException(`Restaurant with ID ${id} not found`);
-//   }
+  if (!restaurant) {
+    throw new NotFoundException(`Restaurant with ID ${id} not found`);
+  }
 
-//   restaurant.isActive = !restaurant.isActive;
+  restaurant.isActive = !restaurant.isActive;
 
-//   return this.RestaurantRepository.save(restaurant);
-// }
+  return this.RestaurantRepository.save(restaurant);
+}
 
  
 

@@ -1,4 +1,4 @@
-import { BadRequestException, Injectable, NotFoundException} from '@nestjs/common';
+import { BadRequestException, Injectable, InternalServerErrorException, NotFoundException} from '@nestjs/common';
 import { TableRepository } from './repositories/table.repository';
 import { InjectRepository } from '@nestjs/typeorm';
 import { CreateTableDto } from './types/dtos/create-table.dto';
@@ -33,7 +33,7 @@ export class TablesService {
               status,
               row,
               col,   
-              blocId: blocFound.id,   
+            
             });
             return this.TableRepository.save( newTable)
             
@@ -62,15 +62,19 @@ export class TablesService {
             return await this.TableRepository.save(table);
           }
           
-          async deleteTable(id: string){
-            const table = await this.TableRepository.findOneBy({ id });
+          async delete(id: string): Promise<void> {
+            const table = await this.TableRepository.findOne({ where: { id } });
           
             if (!table) {
-              throw new NotFoundException(`Table with ID ${id} not found`);
+              throw new NotFoundException('Table not found');
             }
           
-            await this.TableRepository.remove(table);
-            return { message: `Table with ID ${id} successfully deleted` };
+            try {
+              await this.TableRepository.delete(id);
+            } catch (error) {
+              console.error('Erreur lors de la suppression :', error);
+              throw new InternalServerErrorException('Impossible de supprimer la table.');
+            }
           }
           
          

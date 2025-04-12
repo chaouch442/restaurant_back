@@ -22,12 +22,9 @@ export class Restaurant implements IRestaurant {
   @Column({ nullable: false })
   hourly: string;
 
-  @Column({
-    type: 'enum',
-    enum: RestaurantStatus,
-    default: RestaurantStatus.FERME
-  })
+  @Column({ type: 'enum', enum: RestaurantStatus })
   status: RestaurantStatus;
+  
 
   @Column({ default: true })
 isActive: boolean;

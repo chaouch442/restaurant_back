@@ -3,7 +3,7 @@ import {Entity,Column,CreateDateColumn, UpdateDateColumn, PrimaryGeneratedColumn
 
 import { MealTime } from 'src/plats/enums/meal-time.enum';
 import { ReservationTime } from './reservation-time.entity';
-import { ReservationStatus } from '../enums/reservatin.enums';
+import { ReservationStatus } from '../enums/reservation.enums';
 import { User } from 'src/user/entities/user.entity';
 import { TableRestaurant } from 'src/tables/entities/table.entity';
 import { Plat } from 'src/plats/entities/plat.entity';
