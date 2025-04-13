@@ -6,7 +6,7 @@ import {  TableRestaurant } from './entities/table.entity';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { AuthModule } from 'src/auth/auth.module';
 import { UserModule } from 'src/user/user.module';
-import { Bloc } from 'src/bloc/entities/bloc.entity/bloc.entity';
+import { Bloc } from 'src/bloc/entities/bloc.entity';
 
 @Module({
   imports:[TypeOrmModule.forFeature([TableRestaurant, Bloc]) , AuthModule,UserModule],

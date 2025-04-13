@@ -3,125 +3,132 @@ import { RestaurantRepository } from './repositories/restaurant.repository';
 import { CreateRestaurantDto } from './types/dto/create-restaurant.dto';
 import { UpdateRestaurantDto } from './types/dto/update-restaurant.dto';
 import { RestaurantStatus } from './enums/status.enum';
-
+import { ILike } from 'typeorm';
 @Injectable()
 export class RestaurantService {
-  
-  constructor
-  (private readonly RestaurantRepository:RestaurantRepository,
 
-  ){}
+  constructor
+    (private readonly RestaurantRepository: RestaurantRepository,
+
+    ) { }
 
   async getRestaurantById(id: string) {
     const fetchedRestaurant = await this.RestaurantRepository.findOneBy({ id });
-  
+
     if (!fetchedRestaurant) {
       throw new BadRequestException(`Restaurant with ID ${id} not found`);
     }
-  
+
     if (fetchedRestaurant.hourly) {
       const [start, end] = fetchedRestaurant.hourly.split('-');
       const nowHour = new Date().getHours();
-  
+
       const startHour = parseInt(start);
       const endHour = parseInt(end);
-  
+
       const isOpen = nowHour >= startHour && nowHour < endHour;
       fetchedRestaurant.status = isOpen ? RestaurantStatus.OUVERT : RestaurantStatus.FERME;
     }
-  
+
     return fetchedRestaurant;
   }
-  
 
 
 
-async getRestaurant() {
-  const restaurants = await this.RestaurantRepository.find({
-    where: { isActive: true },
-  });
 
+  async getRestaurant(search?: string, isActive?: string) {
+    const where: any = {};
 
-  const nowHour = new Date().getHours();
-  for (const r of restaurants) {
-    if (r.hourly) {
-      const [start, end] = r.hourly.split('-');
-      const startHour = parseInt(start);
-      const endHour = parseInt(end);
-      const isOpen = nowHour >= startHour && nowHour < endHour;
-      r.status = isOpen ? RestaurantStatus.OUVERT : RestaurantStatus.FERME;
+    if (search) {
+      where.name = ILike(`%${search}%`);
     }
+
+    if (isActive === 'true') {
+      where.isActive = true;
+    } else if (isActive === 'false') {
+      where.isActive = false;
+    }
+    const restaurants = await this.RestaurantRepository.find({ where });
+    const nowHour = new Date().getHours();
+    for (const r of restaurants) {
+      if (r.hourly) {
+        const [start, end] = r.hourly.split('-');
+        const startHour = parseInt(start);
+        const endHour = parseInt(end);
+        const isOpen = nowHour >= startHour && nowHour < endHour;
+        r.status = isOpen ? RestaurantStatus.OUVERT : RestaurantStatus.FERME;
+      }
+    }
+
+    return restaurants;
   }
 
-  return restaurants;
-}
 
 
 
+  async createRestaurant(dto: CreateRestaurantDto) {
+    const [start, end] = dto.hourly.split('-');
+    const nowHour = new Date().getHours();
+    const startHour = parseInt(start);
+    const endHour = parseInt(end);
+    const isOpen = nowHour >= startHour && nowHour < endHour;
 
-async createRestaurant(dto: CreateRestaurantDto) {
-  const [start, end] = dto.hourly.split('-');
-  const nowHour = new Date().getHours();
-  const startHour = parseInt(start);
-  const endHour = parseInt(end);
-  const isOpen = nowHour >= startHour && nowHour < endHour;
+    const restaurant = this.RestaurantRepository.create({
+      ...dto,
+      status: isOpen ? RestaurantStatus.OUVERT : RestaurantStatus.FERME
+    });
 
-  const restaurant = this.RestaurantRepository.create({
-    ...dto,
-    status: isOpen ? RestaurantStatus.OUVERT : RestaurantStatus.FERME
-  });
-
-  return this.RestaurantRepository.save(restaurant);
-}
-
+    return this.RestaurantRepository.save(restaurant);
+  }
 
 
-async deleteRestaurant(id: string) {
-  const restaurant = await this.RestaurantRepository.findOneBy({ id });
-  
-  if (!restaurant) {
+
+  async deleteRestaurant(id: string) {
+    const restaurant = await this.RestaurantRepository.findOneBy({ id });
+
+    if (!restaurant) {
       throw new NotFoundException(`Restaurant with ID ${id} not found`);
-  }
-  
-  await this.RestaurantRepository.delete(id);
-  return { message: `Restaurant with ID ${id} deleted successfully` };
-}
+    }
 
-
-async updateRestaurant(id: string, updateRestaurantDto: UpdateRestaurantDto) {
-  const restaurant = await this.RestaurantRepository.findOneBy({ id });
-
-  if (!restaurant) {
-    throw new NotFoundException(`Restaurant with ID ${id} not found`);
+    await this.RestaurantRepository.delete(id);
+    return { message: `Restaurant with ID ${id} deleted successfully` };
   }
 
-  Object.assign(restaurant, updateRestaurantDto);
-  return await this.RestaurantRepository.save(restaurant);
-}
 
-async deactivateRestaurant(id: string) {
-  const restaurant = await this.RestaurantRepository.findOneBy({ id });
+  async updateRestaurant(id: string, updateRestaurantDto: UpdateRestaurantDto) {
+    const restaurant = await this.RestaurantRepository.findOneBy({ id });
 
-  if (!restaurant) {
-    throw new NotFoundException(`Restaurant with ID ${id} not found`);
+    if (!restaurant) {
+      throw new NotFoundException(`Restaurant with ID ${id} not found`);
+    }
+
+    Object.assign(restaurant, updateRestaurantDto);
+    return await this.RestaurantRepository.save(restaurant);
   }
 
-  restaurant.isActive = false;
-  return await this.RestaurantRepository.save(restaurant);
-}
-async toggleActive(id: string) {
-  const restaurant = await this.RestaurantRepository.findOneBy({ id });
+  async deactivateRestaurant(id: string) {
+    const restaurant = await this.RestaurantRepository.findOneBy({ id });
 
-  if (!restaurant) {
-    throw new NotFoundException(`Restaurant with ID ${id} not found`);
+    if (!restaurant) {
+      throw new NotFoundException(`Restaurant with ID ${id} not found`);
+    }
+
+    restaurant.isActive = false;
+    return await this.RestaurantRepository.save(restaurant);
+  }
+  async toggleActive(id: string) {
+    const restaurant = await this.RestaurantRepository.findOneBy({ id });
+
+    if (!restaurant) {
+      throw new NotFoundException(`Restaurant with ID ${id} not found`);
+    }
+
+    restaurant.isActive = !restaurant.isActive;
+
+    return this.RestaurantRepository.save(restaurant);
   }
 
-  restaurant.isActive = !restaurant.isActive;
 
-  return this.RestaurantRepository.save(restaurant);
-}
-
- 
 
 
 }

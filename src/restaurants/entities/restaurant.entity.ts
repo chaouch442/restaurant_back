@@ -6,8 +6,8 @@ import { IRestaurant } from '../interfaces/restaurant.interface';
 export class Restaurant implements IRestaurant {
   @PrimaryGeneratedColumn('uuid')
   id: string;
-  
-@Column()
+
+  @Column()
   name: string;
 
   @Column()
@@ -18,22 +18,27 @@ export class Restaurant implements IRestaurant {
 
   @Column()
   phone: string;
-  
+
   @Column({ nullable: false })
   hourly: string;
 
   @Column({ type: 'enum', enum: RestaurantStatus })
   status: RestaurantStatus;
-  
+
 
   @Column({ default: true })
-isActive: boolean;
+  isActive: boolean;
 
-  
+
+
+
+  @Column({ type: 'text', nullable: true })
+  image: string;
+
   @CreateDateColumn()
-  createdAt: Date; 
+  createdAt: Date;
 
-@UpdateDateColumn()
-  updatedAt: Date; 
- 
+  @UpdateDateColumn()
+  updatedAt: Date;
+
 }

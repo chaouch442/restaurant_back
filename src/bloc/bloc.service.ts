@@ -2,7 +2,7 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 
-import { Bloc } from './entities/bloc.entity/bloc.entity';
+import { Bloc } from './entities/bloc.entity';
 import { CreateBlocDto } from './types/dtos/create-bloc.dto';
 import { BlocRepository } from './repositories/bloc.repository';
 import { TableRestaurant } from 'src/tables/entities/table.entity';

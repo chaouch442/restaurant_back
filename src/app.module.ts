@@ -26,7 +26,7 @@ import { Plat } from './plats/entities/plat.entity';
 import { BlocService } from './bloc/bloc.service';
 import { BlocController } from './bloc/bloc.controller';
 import { BlocModule } from './bloc/bloc.module';
-import { Bloc } from './bloc/entities/bloc.entity/bloc.entity';
+import { Bloc } from './bloc/entities/bloc.entity';
 
 
 
