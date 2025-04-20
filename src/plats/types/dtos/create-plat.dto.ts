@@ -11,10 +11,21 @@ export class CreatePlatDto {
   type: string;
 
   @IsOptional()
-  @IsString() 
+  @IsString()
   image?: string;
 
   @IsNotEmpty()
-  @IsEnum(MealTime)  
+  @IsEnum(MealTime)
   mealTime: MealTime;
+
+
+  @IsString()
+  @IsNotEmpty()
+  description: string;
+
+
+
+  @IsNotEmpty()
+  price: number;
+
 }

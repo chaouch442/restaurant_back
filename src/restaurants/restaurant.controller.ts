@@ -1,5 +1,5 @@
 import { Controller, Get, Post, Delete, Patch, Body, Param, ParseUUIDPipe, UseGuards, Query } from '@nestjs/common';
-import { ApiTags } from '@nestjs/swagger';
+import { ApiQuery, ApiTags } from '@nestjs/swagger';
 import { RestaurantService } from './restaurant.service';
 import { CreateRestaurantDto } from './types/dto/create-restaurant.dto';
 import { Roles } from 'src/auth/decorators/roles.decorator';
@@ -15,19 +15,27 @@ import { UpdateRestaurantDto } from './types/dto/update-restaurant.dto';
 export class RestaurantController {
   constructor(private readonly restaurantService: RestaurantService) { }
 
+
+  @Get('restaurant')
+  @ApiQuery({ name: 'search', required: false })
+  @ApiQuery({ name: 'isActive', required: false })
+  @ApiQuery({ name: 'categorie', required: false })
+  async getRestaurant(
+    @Query('search') search?: string,
+    @Query('isActive') isActive?: string,
+    @Query('categorie') categorie?: string,
+  ) {
+    return this.restaurantService.getRestaurant({ search, isActive, categorie });
+  }
+
   @Get(':id')
   async getRestaurantById(@Param('id', ParseUUIDPipe) id: string) {
     console.log("ID reçu :", id);
     return this.restaurantService.getRestaurantById(id);
   }
 
-  @Get()
-  async getRestaurant(
-    @Query('search') search?: string,
-    @Query('isActive') isActive?: string
-  ) {
-    return this.restaurantService.getRestaurant(search, isActive);
-  }
+
+
 
   @Post()
   @Roles('admin')

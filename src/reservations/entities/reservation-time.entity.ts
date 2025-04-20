@@ -1,22 +1,26 @@
 import {
-    Entity,
-    Column,
-    CreateDateColumn,
-    UpdateDateColumn,
-    ManyToOne,
-    PrimaryGeneratedColumn,
-  } from 'typeorm';
+  Entity,
+  Column,
+  CreateDateColumn,
+  UpdateDateColumn,
+  ManyToOne,
+  PrimaryGeneratedColumn,
+  OneToMany,
+  OneToOne,
+  JoinColumn,
+} from 'typeorm';
 import { IReservationTimeSlot } from '../interfaces/reservation-time.interface';
 import { Restaurant } from 'src/restaurants/entities/restaurant.entity';
-  
-  
+import { ReservationTable } from './reservation.entity';
+
+
 @Entity()
 export class ReservationTime implements IReservationTimeSlot {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
   @Column()
-  name: string; 
+  name: string;
 
   @Column({ type: 'time' })
   startTime: string;
@@ -25,14 +29,19 @@ export class ReservationTime implements IReservationTimeSlot {
   endTime: string;
 
   @Column({ type: 'date', nullable: true })
- date2?: string;
+  date2?: Date;
+
 
 
   @Column({ default: true })
   isActive: boolean;
 
-  @ManyToOne(() => Restaurant, { onDelete: 'CASCADE', eager: true })
-  restaurant: Restaurant;
+
+
+
+  @OneToOne(() => ReservationTable, { eager: true, nullable: true })
+  reservationTable: ReservationTable;
+
 
   @CreateDateColumn()
   createdAt: Date;
@@ -40,4 +49,3 @@ export class ReservationTime implements IReservationTimeSlot {
   @UpdateDateColumn()
   updatedAt: Date;
 }
-  

@@ -1,9 +1,9 @@
 import { RoleUser } from 'src/auth/entities/role.entity';
-import { Entity,  Column,   PrimaryGeneratedColumn, ManyToOne } from 'typeorm';
+import { Entity, Column, PrimaryGeneratedColumn, ManyToOne } from 'typeorm';
 
 @Entity()
 export class User {
-@PrimaryGeneratedColumn()
+  @PrimaryGeneratedColumn()
   id: string;
 
   @Column({ unique: true })
@@ -17,22 +17,28 @@ export class User {
   @Column()
   name: string;
 
+  @Column({ nullable: true })
+  lastname: string;
+
   @Column({ unique: true, nullable: true })
   phone: string;
-  
+
+  @Column({ nullable: true, type: 'date' }) // <= nouveau champ date
+  dateDebutContrat?: Date;
+
   @Column('text', { nullable: true })
   resetToken: string | null;
-  
+
   @Column('timestamp', { nullable: true })
   resetTokenExpires: Date | null;
-  
+
 
   @ManyToOne(() => RoleUser, (role) => role.user, { eager: true })
-role: RoleUser;
- 
+  role: RoleUser;
 
- 
- }
- 
 
-  
+
+}
+
+
+

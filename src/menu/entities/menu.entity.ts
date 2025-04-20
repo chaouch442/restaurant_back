@@ -1,26 +1,30 @@
-import { Entity, PrimaryGeneratedColumn, Column, OneToMany, JoinColumn } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, OneToMany, JoinColumn, ManyToOne } from 'typeorm';
 import { Plat } from '../../plats/entities/plat.entity';
+import { Restaurant } from 'src/restaurants/entities/restaurant.entity';
+import { Exclude } from 'class-transformer';
 
 
 
 @Entity()
-export class MenuRestaurant{
+export class MenuRestaurant {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
   @Column()
   name: string;
 
-  @Column({ type: 'date', nullable: false }) 
-  datecreation: string; 
+  @Column({ type: 'date', nullable: false })
+  datecreation: string;
 
 
   @OneToMany(() => Plat, (plat) => plat.menu, {
     cascade: true,
   })
   plats: Plat[];
-  
-  
 
+
+  @ManyToOne(() => Restaurant, (restaurant) => restaurant.menuRestaurant)
+  @Exclude()
+  restaurant: Restaurant
 
 }

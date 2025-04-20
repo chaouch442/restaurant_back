@@ -8,7 +8,7 @@ import { Plat } from 'src/plats/entities/plat.entity';
 import { platRepository } from 'src/plats/repositories/plat.repository';
 import { getMealTime } from 'src/plats/utils/getMealTime';
 import { UserRepository } from 'src/user/repositories/user.repository';
-import { In, LessThanOrEqual } from 'typeorm';
+import { FindOptionsWhere, In, LessThanOrEqual } from 'typeorm';
 import { UpdateReservationDto } from './types/dtos/update-reservation.dto';
 import { Cron, CronExpression } from '@nestjs/schedule';
 import { TableStatus } from 'src/tables/enums/status.enums';
@@ -21,11 +21,13 @@ import { SystemConfig } from 'src/config/entities/config.entity';
 import { SystemConfigRepository } from 'src/config/repositories/system-config.repository';
 import { ReservationTime } from './entities/reservation-time.entity';
 import { ReservationTimeRepository } from './repositories/reservation-time.repository';
+import moment from 'moment';
+import { CreateReservationTimeDto } from './types/dtos/create-reservation-time.dto';
 
 @Injectable()
 export class ReservationsService {
 
-  
+
   constructor(
     @InjectRepository(Restaurant)
     private readonly restaurantRepository: RestaurantRepository,
@@ -40,30 +42,32 @@ export class ReservationsService {
     private readonly reservationRepository: ReservationRepository,
 
     @InjectRepository(Plat)
-    private readonly   platrepository : platRepository,
+    private readonly platrepository: platRepository,
     @InjectRepository(SystemConfig)
-    private readonly   systemConfigRepository : SystemConfigRepository,
+    private readonly systemConfigRepository: SystemConfigRepository,
 
     @InjectRepository(ReservationTime)
     private readonly reservationTimeRepository: ReservationTimeRepository,
 
-  ) {}
+  ) { }
 
   @Cron(CronExpression.EVERY_MINUTE)
   async updateReservationStatus() {
     const now = new Date();
 
-    const finishedReservations = await this.reservationRepository.find({
+    const reservations = await this.reservationRepository.find({
       where: {
-        reservationDateTime: LessThanOrEqual(now),
         status: ReservationStatus.ACTIVE,
       },
-      relations: ['table'],
+      relations: ['reservationTime', 'table'],
     });
+
+    const finishedReservations = reservations.filter((res) =>
+      res.reservationTime?.startTime && new Date(res.reservationTime.startTime) <= now)
 
     for (const reservation of finishedReservations) {
       if (reservation.table) {
-        reservation.table.status = TableStatus.AVAILABLE;
+        reservation.table.status = TableStatus.LIBRE;
         await this.tableRepository.save(reservation.table);
       }
 
@@ -71,147 +75,357 @@ export class ReservationsService {
       await this.reservationRepository.save(reservation);
     }
   }
-  
+
+
+  // async createReservation(createReservationDto: CreateReservationDto, user) {
+
+  //   const { tableId, reservationDateTime, customerName, platIds } = createReservationDto;
+
+
+  //   const table = await this.tableRepository.findOneBy({ id: tableId });
+  //   if (!table) throw new NotFoundException('Table not found');
+
+  //   const connectedUser = await this.userRepository.findOneBy({ id: user.userId });
+  //   if (!connectedUser) throw new NotFoundException('user not found');
+
+
+  //   const config = await this.systemConfigRepository.findOneBy({});
+  //   if (!config) throw new NotFoundException('System config not found');
+
+  //   const timeSlot = await this.reservationTimeRepository.findOne({
+  //     where: { id: createReservationDto.timeSlotId },
+  //   });
+  //   if (!timeSlot) throw new NotFoundException('Time slot not found');
 
 
 
-   async createReservation(createReservationDto: CreateReservationDto, user) {
-   
-    const { restaurantId, tableId, reservationDateTime,  customerName, platIds } = createReservationDto;
+  //   // //bech ye7seb 9adeh min mara bech ya3mel reo 
+  //   // const pastReservationsCount = await this.reservationRepository.countBy({
+  //   //   restaurant: { id: restaurantId },
+  //   //   user: { id: user.userId }
+  //   // });
 
-    const restaurant = await this.restaurantRepository.findOneBy({ id: restaurantId });
-    if (!restaurant) throw new NotFoundException('Restaurant not found');
-    
-     const table = await this.tableRepository.findOneBy({ id: tableId });
+  //   //fet nombre eno mayjech lil reservation
+  //   // if (pastReservationsCount >= config.maxNoShowAllowed) {
+  //   //   throw new UnauthorizedException(
+  //   //     `لقد تجاوزت الحد الأقصى لعدد الغيابات، الرجاء الاتصال بصاحب المطعم لإعادة التفعيل.`
+  //   //   );
+  //   // }
+  //   //3ando wa9et m7aded mta3 cancel
+  //   const parsedReservationDate = new Date(reservationDateTime);
+  //   const now = new Date();
+  //   const diffInMinutes = (parsedReservationDate.getTime() - now.getTime()) / (1000 * 60);
+  //   if (diffInMinutes < config.maxCancelTimeBeforeReservation) {
+  //     throw new UnauthorizedException(
+  //       `Impossible d’annuler la réservation dans les ${config.maxCancelTimeBeforeReservation} minutes`
+  //     );
+  //   }
+
+  //   const mealTime = getMealTime(parsedReservationDate.toISOString());
+
+  //   if (!mealTime) {
+  //     throw new BadRequestException('Invalid meal time');
+  //   }
+
+
+  //   if (!mealTime) {
+  //     throw new BadRequestException('Invalid meal time');
+  //   }
+
+  //   let plats: Plat[] = [];
+
+  //   if (platIds && platIds.length > 0) {
+  //     plats = await this.platrepository.findBy({
+  //       id: In(platIds),
+  //       mealTime,
+  //     });
+  //   }
+
+  //   const invalidPlats = plats.filter((plat) => plat.mealTime !== mealTime);
+
+  //   if (invalidPlats.length > 0) {
+  //     throw new BadRequestException(`certains plats ne correspondent pas au type de repas: ${mealTime}`);
+  //   }
+
+  //   console.log(user.userId)
+
+
+  //   const reservation = this.reservationRepository.create({
+  //     customerName,
+  //     reservationDateTime: parsedReservationDate.toISOString(),
+  //     table,
+  //     user: connectedUser,
+  //     plats,
+  //     timeSlot
+  //   });
+
+
+
+  //   return this.reservationRepository.save(reservation);
+
+
+  // }
+
+  async createReservation(createReservationDto: CreateReservationDto, user) {
+    const { tableId, customerName, platIds, reservationTime } = createReservationDto;
+
+    const table = await this.tableRepository.findOneBy({ id: tableId });
     if (!table) throw new NotFoundException('Table not found');
 
-     const connectedUser = await this.userRepository.findOneBy({ id:user.userId });
-    if (!connectedUser) throw new NotFoundException('user not found');
- 
-  
+    const connectedUser = await this.userRepository.findOneBy({ id: user.userId });
+    if (!connectedUser) throw new NotFoundException('User not found');
+
     const config = await this.systemConfigRepository.findOneBy({});
     if (!config) throw new NotFoundException('System config not found');
-    
-    const timeSlot = await this. reservationTimeRepository .findOne({
-      where: { id: createReservationDto.timeSlotId },
+    const moment = require('moment');
+
+    //   const overlappingReservations = await this.reservationRepository
+    //     .createQueryBuilder('reservation')
+    //     .where('reservation.tableId = :tableIdd', { tableIdd: tableId })
+    //     .andWhere(`reservation.reservationTimeId.date2 = :date`, { date: reservationTime.date2 })
+    //     .andWhere(`(
+    //   (reservation.reservationTimeId.startTime) < :endTime AND
+    //   (reservation.reservationTimeId.endTime) > :startTime
+    // )`, {
+    //       startTime: reservationTime.startTime, // format: "HH:mm"
+    //       endTime: reservationTime.endTime      // format: "HH:mm"
+    //     })
+    //     .getCount();
+
+
+    // const overlappingReservations = await this.reservationRepository.find({
+    //   where: {
+    //     table: tableId,
+    //     reservationTime: {
+    //       date2: Raw((alias) => `${alias} ->> 'date2' = :date`, { date: requestedDate }),
+    //       startTime: Raw((alias) => `${alias} ->> 'endTime' > :startTime`, { startTime: requestedStartTime }),
+    //       endTime: Raw((alias) => `${alias} ->> 'startTime' < :endTime`, { endTime: requestedEndTime }),
+    //     },
+    //   },
+    // });
+
+
+    // if (overlappingReservations > 0) {
+    //   throw new BadRequestException('La table est déjà réservée dans ce créneau horaire.');
+    // }
+
+
+    const existingReservation = await this.reservationRepository
+      .createQueryBuilder('reservation')
+      .leftJoin('reservation.table', 'table')
+      .leftJoin('reservation.reservationTime', 'time')
+      .where('table.id = :tableId', { tableId })
+      .andWhere('time.date2 = :reservationDate', { reservationDate: reservationTime.date2 })
+      .andWhere(
+        '(time.startTime < :endTime AND time.endTime > :startTime)',
+        {
+          startTime: reservationTime.startTime,
+          endTime: reservationTime.endTime,
+        },
+      )
+      .getOne();
+    console.log(existingReservation)
+    if (existingReservation && !existingReservation.isCancelled) {
+      throw new BadRequestException('La table est déjà réservée dans ce créneau horaire.');
+    }
+
+    console.log(reservationTime.date2)
+    const debutDateTime = moment(`${reservationTime.date2}T${reservationTime.startTime}`);
+    const finDateTime = moment(`${reservationTime.date2}T${reservationTime.endTime}`);
+    validateReservationTime(debutDateTime, finDateTime, config.maxCancelTimeBeforeReservation);
+    const startMoment = moment(reservationTime.startTime, 'HH:mm');
+    const endMoment = moment(reservationTime.endTime, 'HH:mm');
+
+    const reservationMealTime = getMealTimeForRange(startMoment, endMoment);
+
+    if (!reservationMealTime) {
+      throw new BadRequestException('Le créneau de réservation doit appartenir entièrement à un seul type de repas : breakfast, lunch ou dinner.');
+    }
+
+    const plats = await this.platrepository.findByIds(platIds);
+
+    await validatePlatsCoherence(platIds, reservationTime.startTime, reservationTime.endTime, plats);
+    await this.reservationTimeRepository.save(reservationTime);
+    const reservation = this.reservationRepository.create({
+      customerName,
+      table,
+      user: connectedUser,
+      plats,
+      reservationTime
     });
-    if (!timeSlot) throw new NotFoundException('Time slot not found');
-    
-  
-    
-//bech ye7seb 9adeh min mara bech ya3mel reo 
-    const pastReservationsCount = await this.reservationRepository.countBy({
-      restaurant: { id: restaurantId },
-      user: { id: user.userId }
-    });
-    
-    //fet nombre eno mayjech lil reservation
-    if (pastReservationsCount >= config.maxNoShowAllowed) {
-      throw new UnauthorizedException(
-        `لقد تجاوزت الحد الأقصى لعدد الغيابات، الرجاء الاتصال بصاحب المطعم لإعادة التفعيل.`
+    await this.reservationRepository.save(reservation);
+    const reservationTimeWithreservation = {
+      ...reservationTime,
+      reservation,
+    };
+    await this.reservationTimeRepository.save(reservationTimeWithreservation);
+
+
+
+
+    return reservation;
+  }
+
+
+
+
+
+
+
+
+
+
+
+
+  async getReservationById(id: string) {
+    const fetchedReservation = await this.reservationRepository.findOneBy({ id: id });
+
+    if (!fetchedReservation) {
+      throw new BadRequestException(`Reservation with ID ${id} not found`);
+    }
+
+    return fetchedReservation;
+  }
+
+
+  async getReservation() {
+    return this.reservationRepository.find();
+  }
+
+
+
+
+  async updateReservation(id: string, updateReservationDto: UpdateReservationDto, user: User) {
+    const reservation = await this.reservationRepository.findOneBy({ id });
+
+    if (!reservation) {
+      throw new NotFoundException(`Restaurant with ID ${id} not found`);
+    }
+    if (reservation.user.id !== user.id) {
+      throw new UnauthorizedException('Vous ne pouvez modifier que vos propres réservations');
+    }
+
+    Object.assign(reservation, updateReservationDto);
+    return await this.reservationRepository.save(reservation);
+  }
+
+  async deleteReservation(id: string, user: User) {
+    const reservation = await this.reservationRepository.findOneBy({ id });
+
+    if (!reservation) {
+      throw new NotFoundException(`Restaurant with ID ${id} not found`);
+    }
+    if (reservation.user.id !== user.id) {
+      throw new UnauthorizedException("Vous ne pouvez supprimer que vos propres réservations");
+    }
+    await this.reservationRepository.delete(id);
+    return { message: `Restaurant with ID ${id} deleted successfully` };
+  }
+
+
+
+
+
+
+
+
+
+
+
+
+}
+
+
+function validateReservationTime(debutDateTime, finDateTime, maxCancelTimeBeforeReservation) {
+  const moment = require('moment');
+
+
+  const now = moment();
+
+  if (!debutDateTime.isValid() || !finDateTime.isValid()) {
+    throw new BadRequestException('Date ou heure invalide.');
+  }
+
+  if (!debutDateTime.isBefore(finDateTime)) {
+    throw new BadRequestException('L\'heure de début doit être avant l\'heure de fin.');
+  }
+
+  if (finDateTime.diff(debutDateTime, 'minutes') < 60) {
+    throw new BadRequestException('La durée de la réservation doit être d\'au moins 1 heure.');
+  }
+
+  const minStartTime = now.add(maxCancelTimeBeforeReservation, 'minutes');
+  if (!debutDateTime.isAfter(minStartTime)) {
+    throw new BadRequestException(`La réservation doit être faite au moins ${maxCancelTimeBeforeReservation} minutes à l'avance.`);
+  }
+
+
+
+}
+
+
+async function validatePlatsCoherence(platIds: string[], startTime: string, endTime: string, plats) {
+  const moment = require('moment');
+  const reservationStart = moment(startTime, 'HH:mm');
+  const reservationEnd = moment(endTime, 'HH:mm');
+
+  const mealTimeRanges = {
+    breakfast: { start: moment('08:00', 'HH:mm'), end: moment('12:00', 'HH:mm') },
+    lunch: { start: moment('12:00', 'HH:mm'), end: moment('18:00', 'HH:mm') },
+    dinner: { start: moment('18:00', 'HH:mm'), end: moment('23:59', 'HH:mm') },
+  };
+
+  for (const plat of plats) {
+    const allowedRange = mealTimeRanges[plat.mealTime];
+
+    const isStartInRange = reservationStart.isSameOrAfter(allowedRange.start) && reservationStart.isBefore(allowedRange.end);
+    const isEndInRange = reservationEnd.isAfter(allowedRange.start) && reservationEnd.isSameOrBefore(allowedRange.end);
+
+    if (!(isStartInRange && isEndInRange)) {
+      throw new BadRequestException(
+        `Le plat "${plat.name}" est disponible uniquement pour le ${plat.mealTime}, mais la réservation est en dehors de ce créneau.`
       );
     }
-    //3ando wa9et m7aded mta3 cancel
-    
-    const now = new Date();
-    const diffInMinutes = (new Date(reservationDateTime).getTime() - now.getTime()) / (1000 * 60);
-    if (diffInMinutes < config.maxCancelTimeBeforeReservation) {
-      throw new UnauthorizedException(` Impossible d’annuler la réservation dans les ${config.maxCancelTimeBeforeReservation} minutes`);
+  }
+}
+
+
+function getMealTimeForRange(start: moment.Moment, end: moment.Moment): 'breakfast' | 'lunch' | 'dinner' | null {
+  const moment = require('moment');
+  const ranges = {
+    breakfast: { start: moment('08:00', 'HH:mm'), end: moment('12:00', 'HH:mm') },
+    lunch: { start: moment('12:00', 'HH:mm'), end: moment('18:00', 'HH:mm') },
+    dinner: { start: moment('18:00', 'HH:mm'), end: moment('23:59', 'HH:mm') },
+  };
+
+  for (const [mealTime, range] of Object.entries(ranges)) {
+    if (
+      start.isSameOrAfter(range.start) &&
+      end.isSameOrBefore(range.end)
+    ) {
+      return mealTime as 'breakfast' | 'lunch' | 'dinner';
     }
-    
-  const mealTime = getMealTime(reservationDateTime);
-  if (!mealTime) {
-    throw new BadRequestException('Invalid meal time');
   }
 
-let plats: Plat[] = [];
-
-if (platIds && platIds.length > 0) {
-  plats = await this.platrepository.findBy({
-    id: In(platIds),
-    mealTime,
-  });
-}
-
-const invalidPlats = plats.filter((plat) => plat.mealTime !== mealTime);
-
-if (invalidPlats.length > 0) {
-  throw new BadRequestException(`certains plats ne correspondent pas au type de repas: ${mealTime}`);
-}
-
-     console.log(user.userId)
-
-
-     const reservation = this.reservationRepository.create({
-      customerName,
-      reservationDateTime:timeSlot.startTime,
-      restaurant,
-       table,
-      user:connectedUser,
-       plats,
-       timeSlot
-    });
-   
-
-
-    return this.reservationRepository.save(reservation);
-  
-  
+  return null;
 }
 
 
 
 
-async getReservationById(id: string) {
-  const fetchedReservation = await this.reservationRepository.findOneBy( { id: id } );
+async function isTableAvailable(
+  tableId: string,
+  debutDateTime: Date,
+  finDateTime: Date
+): Promise<boolean> {
+  const overlappingReservations = await this.reservationRepository
+    .createQueryBuilder('reservation')
+    .where('reservation.tableId = :tableId', { tableId })
+    .andWhere('reservation.debutDateTime < :finDateTime', { finDateTime })
+    .andWhere('reservation.finDateTime > :debutDateTime', { debutDateTime })
+    .getCount();
 
-  if (!fetchedReservation) {
-      throw new BadRequestException(`Reservation with ID ${id} not found`);
-  }
-
-  return fetchedReservation;
+  return overlappingReservations === 0;
 }
-
-
-async getReservation() {
-  return this.reservationRepository.find();
-}
-
-
-
-
-async updateReservation(id: string, updateReservationDto: UpdateReservationDto,user: User) {
-  const reservation = await this.reservationRepository.findOneBy({ id });
-
-  if (!reservation){
-    throw new NotFoundException(`Restaurant with ID ${id} not found`);
-  }
-  if (reservation.user.id !== user.id) {
-    throw new UnauthorizedException('Vous ne pouvez modifier que vos propres réservations');
-  }
-
-  Object.assign(reservation, updateReservationDto);
-  return await this.reservationRepository.save(reservation);
-}
-
-async deleteReservation(id: string,user: User) {
-  const reservation = await this.reservationRepository.findOneBy({ id });
-  
-  if (!reservation) {
-      throw new NotFoundException(`Restaurant with ID ${id} not found`);
-  }
-  if (reservation.user.id !== user.id) {
-    throw new UnauthorizedException("Vous ne pouvez supprimer que vos propres réservations");
-  }
-  await this.reservationRepository.delete(id);
-  return { message: `Restaurant with ID ${id} deleted successfully` };
-}
-
-
-
-
-}
-
-
 
 

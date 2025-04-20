@@ -1,4 +1,4 @@
-import {Entity,Column,CreateDateColumn, UpdateDateColumn, PrimaryGeneratedColumn, ManyToOne, JoinTable, ManyToMany} from 'typeorm';
+import { Entity, Column, CreateDateColumn, UpdateDateColumn, PrimaryGeneratedColumn, ManyToOne, JoinTable, ManyToMany, OneToOne, JoinColumn } from 'typeorm';
 
 
 import { MealTime } from 'src/plats/enums/meal-time.enum';
@@ -19,8 +19,7 @@ export class ReservationTable {
   @Column()
   customerName: string;
 
-  @Column({ type: 'timestamp' })
-  reservationDateTime: Date;
+
 
   @Column({ default: false })
   isCancelled: boolean;
@@ -34,8 +33,7 @@ export class ReservationTable {
   @ManyToOne(() => User, { eager: true })
   user: User;
 
-  @ManyToOne(() => Restaurant, { eager: true })
-  restaurant: Restaurant;
+
 
   @ManyToOne(() => TableRestaurant, { eager: true, nullable: true })
   table?: TableRestaurant;
@@ -47,10 +45,9 @@ export class ReservationTable {
   @Column({ type: 'enum', enum: MealTime, nullable: true })
   mealTime?: MealTime;
 
-
-
-  @ManyToOne(() => ReservationTime, { eager: true, nullable: true }) 
-  timeSlot?: ReservationTime;
+  @OneToOne(() => ReservationTime, { eager: true, nullable: true })
+  @JoinColumn()
+  reservationTime?: ReservationTime;
 
   @CreateDateColumn()
   createdAt: Date;

@@ -5,33 +5,38 @@ import { ReservationTable } from 'src/reservations/entities/reservation.entity';
 
 
 @Entity()
-export class Plat{
+export class Plat {
   @PrimaryGeneratedColumn('uuid')
   id: string;
- 
+
   @Column()
   name: string;
 
   @Column()
   type: string;
 
+  @Column({ nullable: true })
+  price: number;
+
   @Column({ type: 'text', nullable: true })
   image: string;
-  
 
- 
-  @Column({ type: 'enum', enum: MealTime }) 
+
+  @Column({ nullable: true })
+  description: string
+
+  @Column({ type: 'enum', enum: MealTime })
   mealTime: MealTime;
 
   @ManyToOne(() => MenuRestaurant, (menu) => menu.plats, {
     onDelete: 'CASCADE',
   })
   menu: MenuRestaurant;
-  
+
   @ManyToMany(() => ReservationTable, (reservation) => reservation.plats)
   reservations: ReservationTable[];
-  
 
-  
-  
+
+
+
 }

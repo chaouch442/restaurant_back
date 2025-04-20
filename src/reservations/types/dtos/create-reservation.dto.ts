@@ -1,34 +1,35 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsUUID, IsNotEmpty, IsDateString, IsOptional, IsString } from 'class-validator';
+import { Expose, Type } from 'class-transformer';
+import { IsUUID, IsNotEmpty, IsDateString, IsOptional, IsString, IsArray, ValidateNested } from 'class-validator';
+import { Column } from 'typeorm';
+import { CreateReservationTimeDto } from './create-reservation-time.dto';
 
 export class CreateReservationDto {
-  @ApiProperty() 
+
+
+  @ApiProperty()
   @IsUUID()
   @IsNotEmpty()
-  restaurantId: string;
+  tableId: string;
 
-@ApiProperty() 
-  @IsUUID()
-  @IsNotEmpty()
-  tableId: string;  
-
-@ApiProperty() 
+  @ApiProperty()
   @IsString()
   @IsOptional()
-  customerName?: string; 
-  
-  @ApiProperty() 
-  @IsDateString()
-  @IsNotEmpty()
-  reservationDateTime: string; 
+  customerName?: string;
 
-  @ApiProperty() 
+
+
+
+  @ApiProperty()
   @IsOptional()
-platIds: string[]; 
+  platIds: string[];
 
 
-@IsUUID()
-@ApiProperty() 
-  timeSlotId?: string;
+
+  @Expose()
+  @ApiProperty()
+  @ValidateNested()
+  @Type(() => CreateReservationTimeDto)
+  reservationTime: CreateReservationTimeDto;
 
 }

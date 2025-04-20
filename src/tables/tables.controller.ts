@@ -10,24 +10,24 @@ import { Roles } from 'src/auth/decorators/roles.decorator';
 @ApiTags('tables')
 @Controller('tables')
 export class TablesController {
-constructor(private readonly tableService: TablesService) {}
+  constructor(private readonly tableService: TablesService) { }
 
- @Roles('manager')
-@Post()
-  createTable(@Body() createTableDto:CreateTableDto) {
+  @Roles('manager')
+  @Post()
+  createTable(@Body() createTableDto: CreateTableDto) {
     return this.tableService.createTable(createTableDto);
   }
   @Get()
-  async getTable(){
+  async getTable() {
     return this.tableService.getTable();
   }
   @Get(':id')
-  async getTableById(@Param('id',ParseUUIDPipe)id:string){
+  async getTableById(@Param('id', ParseUUIDPipe) id: string) {
     return this.tableService.getTableById(id);
   }
   @Roles('manager')
   @Patch(':id')
-  async updateTable(@Param('id') id: string, @Body() UpdateTableDto:UpdateTableDto ) {
+  async updateTable(@Param('id') id: string, @Body() UpdateTableDto: UpdateTableDto) {
     return this.tableService.updateTable(id, UpdateTableDto);
   }
   @Roles('manager')
@@ -35,7 +35,16 @@ constructor(private readonly tableService: TablesService) {}
   async deleteTable(@Param('id') id: string) {
     return this.tableService.delete(id);
   }
-  
+
+
+  @Patch(':id/status')
+  async updateTableStatus(
+    @Param('id') id: string,
+    @Body('status') status: string
+  ) {
+    return this.tableService.updateStatus(id, status);
   }
+
+}
 
 

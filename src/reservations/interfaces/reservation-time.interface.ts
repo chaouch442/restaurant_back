@@ -8,6 +8,6 @@ export interface IReservationTimeSlot extends Identifiable {
   endTime: string;
   date?: string;
   isActive: boolean;
-  restaurant: IRestaurant;
- 
+
+
 }

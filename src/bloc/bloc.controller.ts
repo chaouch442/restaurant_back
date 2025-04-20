@@ -7,13 +7,14 @@ import { ApiTags } from '@nestjs/swagger';
 @ApiTags('bloc')
 @Controller('bloc')
 export class BlocController {
-  constructor(private readonly blocService: BlocService) {}
+  constructor(private readonly blocService: BlocService) { }
 
   @Post()
-  create(@Body() createBlocDto: CreateBlocDto) {
-    return this.blocService.create(createBlocDto);
+  create(@Body() createDto: CreateBlocDto) {
+    return this.blocService.create(createDto);
   }
-  
+
+
 
   @Get()
   findAll() {
@@ -24,4 +25,5 @@ export class BlocController {
   findOne(@Param('id') id: string) {
     return this.blocService.findOne(id);
   }
+
 }

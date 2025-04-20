@@ -13,7 +13,7 @@ import { MenuModule } from './menu/menu.module';
 import { PlatsService } from './plats/plats.service';
 import { PlatsModule } from './plats/plats.module';
 import { ReservationsModule } from './reservations/reservations.module';
-import {  ReservationTable } from './reservations/entities/reservation.entity';
+import { ReservationTable } from './reservations/entities/reservation.entity';
 import { ReservationTime } from './reservations/entities/reservation-time.entity';
 import { SystemConfig } from './config/entities/config.entity';
 import { CustomConfigModule } from './config/config.module';
@@ -27,6 +27,8 @@ import { BlocService } from './bloc/bloc.service';
 import { BlocController } from './bloc/bloc.controller';
 import { BlocModule } from './bloc/bloc.module';
 import { Bloc } from './bloc/entities/bloc.entity';
+import { RestaurantImage } from './image/image.entity';
+import { RestaurantBloc } from './restaurants/entities/Restaurant-Bloc.entity';
 
 
 
@@ -43,13 +45,13 @@ import { Bloc } from './bloc/entities/bloc.entity';
         username: 'postgres',
         password: '0000',
         database: 'restaurants',
-        entities: [Restaurant, User, RoleUser, TableRestaurant,MenuRestaurant,Plat, ReservationTable,ReservationTime,SystemConfig,Bloc],
+        entities: [Restaurant, User, RoleUser, TableRestaurant, MenuRestaurant, Plat, ReservationTable, ReservationTime, SystemConfig, Bloc, RestaurantImage, RestaurantBloc],
         synchronize: true,
         logging: true,
       }),
     }),
- 
-    TypeOrmModule.forFeature([User, RoleUser, Restaurant,TableRestaurant,MenuRestaurant,Plat, ReservationTable,ReservationTime,SystemConfig,Bloc]),
+
+    TypeOrmModule.forFeature([User, RoleUser, Restaurant, TableRestaurant, MenuRestaurant, Plat, ReservationTable, ReservationTime, SystemConfig, Bloc, RestaurantImage, RestaurantBloc]),
     RestaurantModule,
     AuthModule,
     UserModule,
@@ -58,11 +60,12 @@ import { Bloc } from './bloc/entities/bloc.entity';
     PlatsModule,
     ReservationsModule,
     CustomConfigModule,
-    BlocModule
-  
-   
+    BlocModule,
+    // CustomerModule
+
+
   ],
   controllers: [AppController, ModuleController, BlocController],
   providers: [AppService, PlatsService, BlocService],
 })
-export class AppModule {}
+export class AppModule { }

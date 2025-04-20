@@ -1,5 +1,5 @@
 export enum TableStatus {
-    AVAILABLE = 'available',
-    OCCUPIED = 'occupied',
-  }
-  
+  LIBRE = 'libre',
+  OCCUPEE = 'occupee',
+  RESERVEE = 'reservee',
+}

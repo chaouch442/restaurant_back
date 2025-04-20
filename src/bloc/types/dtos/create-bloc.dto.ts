@@ -8,19 +8,11 @@ export class CreateBlocDto {
   @IsString()
   name: string;
 
-  @ApiProperty()
-  @IsString()
-  etage: string;
 
-  @ApiProperty({ enum: ViewType })
-  @IsEnum(ViewType)
-  view: ViewType;
-   
 
-    @ApiProperty({ enum: BlocStatus })
-    @IsEnum(BlocStatus, {
-      message: 'Le status doit être soit "true" soit "false"',
-    })
-    status: BlocStatus;
-  }
-  
+  @ApiProperty({ enum: BlocStatus })
+  @IsEnum(BlocStatus, {
+    message: 'Le status doit être soit "true" soit "false"',
+  })
+  status: BlocStatus;
+}
