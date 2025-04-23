@@ -15,7 +15,6 @@ export class CreateUserDto {
 
 
   @ApiProperty()
-  @IsOptional()
   @IsString()
   lastname?: string;
 

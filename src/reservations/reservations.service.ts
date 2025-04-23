@@ -23,6 +23,7 @@ import { ReservationTime } from './entities/reservation-time.entity';
 import { ReservationTimeRepository } from './repositories/reservation-time.repository';
 import moment from 'moment';
 import { CreateReservationTimeDto } from './types/dtos/create-reservation-time.dto';
+import { SystemConfigService } from 'src/config/config.service';
 
 @Injectable()
 export class ReservationsService {
@@ -48,6 +49,8 @@ export class ReservationsService {
 
     @InjectRepository(ReservationTime)
     private readonly reservationTimeRepository: ReservationTimeRepository,
+    private readonly systemconfigService: SystemConfigService,
+
 
   ) { }
 
@@ -295,31 +298,133 @@ export class ReservationsService {
 
 
 
-  async updateReservation(id: string, updateReservationDto: UpdateReservationDto, user: User) {
-    const reservation = await this.reservationRepository.findOneBy({ id });
+  async updateReservation(id: string, updateReservationDto: UpdateReservationDto, user: any) {
+    const reservation = await this.reservationRepository.findOne({
+      where: { id },
+      relations: ['user', 'reservationTime', 'table'],
+    });
 
     if (!reservation) {
-      throw new NotFoundException(`Restaurant with ID ${id} not found`);
-    }
-    if (reservation.user.id !== user.id) {
-      throw new UnauthorizedException('Vous ne pouvez modifier que vos propres réservations');
+      throw new NotFoundException(`Réservation avec l'ID ${id} introuvable`);
     }
 
-    Object.assign(reservation, updateReservationDto);
-    return await this.reservationRepository.save(reservation);
+    const config = await this.systemconfigService.getConfig();
+    const now = new Date();
+
+    const timeSlot = reservation.reservationTime;
+
+    if (!timeSlot) {
+      throw new BadRequestException('Créneau horaire de la réservation manquant.');
+    }
+
+    if (!timeSlot.date2 || !timeSlot.startTime) {
+      throw new BadRequestException('Date ou heure de réservation manquante.');
+    }
+
+
+    const dateOnly = new Date(timeSlot.date2).toISOString().split('T')[0];
+    const reservationDateTime = new Date(`${dateOnly}T${timeSlot.startTime}`);
+    const diffInMinutes = Math.floor((reservationDateTime.getTime() - now.getTime()) / 60000);
+
+
+    if (updateReservationDto.isCancelled || updateReservationDto.status === ReservationStatus.CANCELLED) {
+
+      if (diffInMinutes < config.maxCancelTimeBeforeReservation) {
+        throw new BadRequestException(
+          `Vous ne pouvez annuler qu'au moins ${config.maxCancelTimeBeforeReservation} minutes à l'avance.`
+        );
+      }
+
+
+      const userNoShowCount = reservation.user?.noShowCount || 0;
+
+      if (userNoShowCount >= config.maxNoShowAllowed) {
+        throw new BadRequestException(
+          `Vous avez atteint la limite de non-présentations (${config.maxNoShowAllowed}). Contactez le restaurant.`
+        );
+      }
+
+      reservation.isCancelled = true;
+      reservation.status = ReservationStatus.CANCELLED;
+    }
+
+    if (updateReservationDto.isReported) {
+      if (reservation.status === ReservationStatus.CANCELLED) {
+        throw new BadRequestException(
+          `Vous ne pouvez pas reporter une réservation déjà annulée.`
+        );
+      }
+
+      if (reservation.reportCount >= config.maxReportAllowed) {
+        throw new BadRequestException(
+          `Vous avez atteint le nombre maximal de reports (${config.maxReportAllowed}).`
+        );
+      }
+
+      if (diffInMinutes < config.maxReportTimeBeforeReservation) {
+        throw new BadRequestException(
+          `Vous ne pouvez plus reporter cette réservation. Il faut au moins ${config.maxReportTimeBeforeReservation} minutes avant l'heure prévue.`
+        );
+      }
+
+      reservation.reportCount += 1;
+    }
+
+
+    if (updateReservationDto.customerName) {
+      reservation.customerName = updateReservationDto.customerName;
+    }
+
+    const updated = await this.reservationRepository.save(reservation);
+
+
+    return {
+      id: updated.id,
+      isCancelled: updated.isCancelled,
+      status: updated.status,
+      customerName: updated.customerName,
+      reservationDate: updated.reservationTime?.date2,
+      userId: updated.user?.id,
+      tableId: updated.table?.id,
+      reservationTimeId: updated.reservationTime?.id,
+    };
   }
 
   async deleteReservation(id: string, user: User) {
-    const reservation = await this.reservationRepository.findOneBy({ id });
+    const reservation = await this.reservationRepository.findOne({
+      where: { id },
+      relations: ['user', 'reservationTime'],
+    });
 
     if (!reservation) {
-      throw new NotFoundException(`Restaurant with ID ${id} not found`);
+      throw new NotFoundException(`Réservation avec l'ID ${id} introuvable`);
     }
+
     if (reservation.user.id !== user.id) {
       throw new UnauthorizedException("Vous ne pouvez supprimer que vos propres réservations");
     }
+
+    const now = new Date();
+
+
+    if (!reservation.reservationTime?.date2 || !reservation.reservationTime?.endTime) {
+      throw new BadRequestException("Les informations de temps de réservation sont incomplètes.");
+    }
+
+    const fullEndDateTime = new Date(
+      `${reservation.reservationTime.date2.toISOString().split('T')[0]}T${reservation.reservationTime.endTime}:00`
+    );
+
+    const isCancellable =
+      reservation.status === ReservationStatus.CANCELLED || fullEndDateTime < now;
+
+    if (!isCancellable) {
+      throw new BadRequestException("Seules les réservations annulées ou passées peuvent être supprimées");
+    }
+
     await this.reservationRepository.delete(id);
-    return { message: `Restaurant with ID ${id} deleted successfully` };
+
+    return { message: `Réservation avec l'ID ${id} supprimée avec succès` };
   }
 
 

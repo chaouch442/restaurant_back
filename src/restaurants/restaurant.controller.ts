@@ -64,6 +64,11 @@ export class RestaurantController {
     return this.restaurantService.toggleActive(id);
   }
 
+  @Get('with-menus')
+  getRestaurantsWithMenus() {
+    return this.restaurantService.findAllWithMenus();
+  }
+
 
 }
 

@@ -30,6 +30,7 @@ export class Plat {
 
   @ManyToOne(() => MenuRestaurant, (menu) => menu.plats, {
     onDelete: 'CASCADE',
+    nullable: false
   })
   menu: MenuRestaurant;
 

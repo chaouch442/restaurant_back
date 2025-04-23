@@ -1,4 +1,4 @@
-import { IsEnum, IsInt, IsNumber, IsOptional, IsString, IsUUID, Min, ValidateNested } from 'class-validator';
+import { IsEnum, IsIn, IsInt, IsNumber, IsOptional, IsString, IsUUID, Min, ValidateNested } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 import { TableStatus } from 'src/tables/enums/status.enums';
 import { ReservationTable } from 'src/reservations/entities/reservation.entity';
@@ -30,6 +30,10 @@ export class CreateTableDto {
   @ApiProperty()
   @IsNumber()
   col: number;
+  @ApiProperty()
+  @IsOptional()
+  @IsIn(['circle', 'square', 'triangle'])
+  shape?: string;
 
   @ApiProperty()
   @IsString()

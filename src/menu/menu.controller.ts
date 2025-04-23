@@ -9,14 +9,14 @@ import { MealTime } from 'src/plats/enums/meal-time.enum';
 @ApiTags('menu')
 @Controller('menu')
 export class MenuController {
-  constructor(private readonly menuService: MenuService) {}
- @Roles('manager')
+  constructor(private readonly menuService: MenuService) { }
+  @Roles('manager')
   @Post()
-   async createMenu(@Body() createMenuDto: CreateMenuDto) {
+  async createMenu(@Body() createMenuDto: CreateMenuDto) {
     if (!createMenuDto.datecreation) {
-      throw new Error("La date de création est obligatoire !"); 
+      throw new Error("La date de création est obligatoire !");
     }
-    return this.menuService.createMenu(createMenuDto);   
+    return this.menuService.createMenu(createMenuDto);
   }
 
   @Get()
@@ -25,24 +25,26 @@ export class MenuController {
   }
 
   @Get(':id')
-  async getMenuById(@Param('id',ParseUUIDPipe) id: string) {
+  async getMenuById(@Param('id', ParseUUIDPipe) id: string) {
     return this.menuService.getMenuById(id);
   }
- @Roles('manager')
+  @Roles('manager')
   @Patch(':id')
- async updateMenu(@Param('id') id: string, @Body() updateMenuDto: UpdateMenuDto) {
+  async updateMenu(@Param('id') id: string, @Body() updateMenuDto: UpdateMenuDto) {
     return this.menuService.updateMenu(id, updateMenuDto);
   }
- @Roles('manager')
+  @Roles('manager')
   @Delete(':id')
-  async deleteMenu(@Param('id', ParseUUIDPipe)id: string) {
+  async deleteMenu(@Param('id', ParseUUIDPipe) id: string) {
     return this.menuService.deleteMenu(id);
   }
 
   @Get('/mealTime/:mealTime')
-async getMenuByMealTime(@Param('mealTime') mealTime: MealTime) {
-  return this.menuService.getMenuByMealTime(mealTime);
+  async getMenuByMealTime(@Param('mealTime') mealTime: MealTime) {
+    return this.menuService.getMenuByMealTime(mealTime);
+  }
+  @Get('by-restaurant/:id')
+  getMenusByRestaurant(@Param('id') restaurantId: string) {
+    return this.menuService.findMenusByRestaurantId(restaurantId);
+  }
 }
-
-}
- 

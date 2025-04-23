@@ -12,10 +12,11 @@ import {
 import { IReservationTimeSlot } from '../interfaces/reservation-time.interface';
 import { Restaurant } from 'src/restaurants/entities/restaurant.entity';
 import { ReservationTable } from './reservation.entity';
+import { Exclude } from 'class-transformer';
 
 
 @Entity()
-export class ReservationTime implements IReservationTimeSlot {
+export class ReservationTime {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
@@ -39,8 +40,11 @@ export class ReservationTime implements IReservationTimeSlot {
 
 
 
-  @OneToOne(() => ReservationTable, { eager: true, nullable: true })
+
+  @Exclude()
+  @OneToOne(() => ReservationTable, reservation => reservation.reservationTime)
   reservationTable: ReservationTable;
+
 
 
   @CreateDateColumn()

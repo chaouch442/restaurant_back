@@ -2,6 +2,7 @@ import { Entity, PrimaryGeneratedColumn, Column, OneToMany, JoinColumn, ManyToOn
 import { Plat } from '../../plats/entities/plat.entity';
 import { Restaurant } from 'src/restaurants/entities/restaurant.entity';
 import { Exclude } from 'class-transformer';
+import { RestaurantImage } from 'src/image/image.entity';
 
 
 
@@ -26,5 +27,8 @@ export class MenuRestaurant {
   @ManyToOne(() => Restaurant, (restaurant) => restaurant.menuRestaurant)
   @Exclude()
   restaurant: Restaurant
+
+
+
 
 }

@@ -8,9 +8,10 @@ import { AuthModule } from 'src/auth/auth.module';
 import { UserModule } from 'src/user/user.module';
 
 import { RestaurantBloc } from 'src/restaurants/entities/Restaurant-Bloc.entity';
+import { ReservationTable } from 'src/reservations/entities/reservation.entity';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([TableRestaurant, RestaurantBloc]), AuthModule, UserModule],
+  imports: [TypeOrmModule.forFeature([TableRestaurant, RestaurantBloc, ReservationTable]), AuthModule, UserModule],
   controllers: [TablesController],
   providers: [TablesService, TableRepository],
   exports: [TablesService, TableRepository],

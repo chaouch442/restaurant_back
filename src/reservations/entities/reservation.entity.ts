@@ -8,6 +8,7 @@ import { User } from 'src/user/entities/user.entity';
 import { TableRestaurant } from 'src/tables/entities/table.entity';
 import { Plat } from 'src/plats/entities/plat.entity';
 import { Restaurant } from 'src/restaurants/entities/restaurant.entity';
+import { Exclude } from 'class-transformer';
 
 
 
@@ -29,21 +30,23 @@ export class ReservationTable {
     default: ReservationStatus.ACTIVE,
   })
   status: ReservationStatus;
-
-  @ManyToOne(() => User, { eager: true })
+  @Exclude()
+  @ManyToOne(() => User, { onDelete: 'SET NULL', nullable: true, eager: true })
   user: User;
 
 
 
-  @ManyToOne(() => TableRestaurant, { eager: true, nullable: true })
+
+  @ManyToOne(() => TableRestaurant, { onDelete: 'SET NULL', eager: true, nullable: true })
   table?: TableRestaurant;
 
   @ManyToMany(() => Plat, { eager: true })
   @JoinTable()
   plats: Plat[];
 
-  @Column({ type: 'enum', enum: MealTime, nullable: true })
-  mealTime?: MealTime;
+
+  @Column({ default: 0 })
+  reportCount: number;
 
   @OneToOne(() => ReservationTime, { eager: true, nullable: true })
   @JoinColumn()

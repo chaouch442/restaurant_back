@@ -1,3 +1,4 @@
+import { Exclude } from 'class-transformer';
 import { RoleUser } from 'src/auth/entities/role.entity';
 import { Entity, Column, PrimaryGeneratedColumn, ManyToOne } from 'typeorm';
 
@@ -23,8 +24,13 @@ export class User {
   @Column({ unique: true, nullable: true })
   phone: string;
 
-  @Column({ nullable: true, type: 'date' }) // <= nouveau champ date
+  @Column({ default: 0 })
+  noShowCount: number;
+
+  @Column({ nullable: true, type: 'date' })
   dateDebutContrat?: Date;
+
+
 
   @Column('text', { nullable: true })
   resetToken: string | null;

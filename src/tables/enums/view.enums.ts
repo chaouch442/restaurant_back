@@ -1,6 +1,6 @@
 export enum ViewType {
-    FENETRE = 'fenetre',
-    MER = 'mer',
-    CLASSIQUE = 'classique',
-  }
-  
+  FENETRE = 'Près de la fenêtre ',
+  MER = 'mer',
+  BAR = 'Près du bar',
+  CLASSIQUE = 'classique'
+}

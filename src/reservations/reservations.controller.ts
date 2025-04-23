@@ -12,63 +12,62 @@ import { User } from 'src/user/entities/user.entity';
 
 @ApiTags('reservations')
 @Controller('reservations')
- @UseGuards(RolesGuard)
+@UseGuards(RolesGuard)
 export class ReservationController {
-  
-    constructor(private readonly reservationService: ReservationsService,
-      @InjectRepository(ReservationTable)
-      private readonly reservationRepository,
-    ) {}
 
-    @UseGuards(JwtAuthGuard)
-    @Post()
-    async createReservation(
-      @Body() createReservationDto: CreateReservationDto,
-      @userId() user: User,
-    )
-    {
-      console.log("test+++++++++++++++++++++++")
+  constructor(private readonly reservationService: ReservationsService,
+    @InjectRepository(ReservationTable)
+    private readonly reservationRepository,
+  ) { }
+
+  @UseGuards(JwtAuthGuard)
+  @Post()
+  async createReservation(
+    @Body() createReservationDto: CreateReservationDto,
+    @userId() user: User,
+  ) {
+    console.log("test+++++++++++++++++++++++")
     console.log(user)
-      return this.reservationService.createReservation(createReservationDto,user);
-    }
-    
-@Get(':id')
+    return this.reservationService.createReservation(createReservationDto, user);
+  }
+
+  @Get(':id')
   async getReservationById(@Param('id', ParseUUIDPipe) id: string) {
-      console.log("ID reçu :", id); 
-      return this.reservationService.getReservationById(id);
+    console.log("ID reçu :", id);
+    return this.reservationService.getReservationById(id);
   }
   @Get()
   async getReservation() {
-      return this.reservationService.getReservation();
+    return this.reservationService.getReservation();
   }
-   @Patch(':id')
-   @UseGuards(JwtAuthGuard)
-         async updateReservation(@Param('id') id: string, @Body() updatereservationDto :UpdateReservationDto,@userId() user: User,) {
-       console.log('updateReservationDto:', updatereservationDto);
-        return this.reservationService.updateReservation(id, updatereservationDto,user);
-        }
-      @Delete(':id')
-     @UseGuards(JwtAuthGuard)
-      async deleteReservation(@Param('id', ParseUUIDPipe) id: string, @userId() user: User,) {
-          return this.reservationService.deleteReservation(id,user);
-      }
-
-
-      @Get('verify/:id')
-async verifyReservation(@Param('id') id: string) {
-  const reservation = await this.reservationRepository.findOneBy({ id });
-
-  if (!reservation) {
-    throw new NotFoundException('Réservation non trouvée');
+  @Patch(':id')
+  @UseGuards(JwtAuthGuard)
+  async updateReservation(@Param('id') id: string, @Body() updatereservationDto: UpdateReservationDto, @userId() user: any,) {
+    console.log('updateReservationDto:', updatereservationDto);
+    return this.reservationService.updateReservation(id, updatereservationDto, user);
+  }
+  @Delete(':id')
+  @UseGuards(JwtAuthGuard)
+  async deleteReservation(@Param('id', ParseUUIDPipe) id: string, @userId() user: User,) {
+    return this.reservationService.deleteReservation(id, user);
   }
 
-  return {
-    message: 'Réservation valide',
-    customerName: reservation.customerName,
-    reservationDateTime: reservation.reservationDateTime,
-    table: reservation.table,
-    restaurant: reservation.restaurant,
-  };
+
+  @Get('verify/:id')
+  async verifyReservation(@Param('id') id: string) {
+    const reservation = await this.reservationRepository.findOneBy({ id });
+
+    if (!reservation) {
+      throw new NotFoundException('Réservation non trouvée');
+    }
+
+    return {
+      message: 'Réservation valide',
+      customerName: reservation.customerName,
+      reservationDateTime: reservation.reservationDateTime,
+      table: reservation.table,
+      restaurant: reservation.restaurant,
+    };
+  }
+
 }
-
-     }

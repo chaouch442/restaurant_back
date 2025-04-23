@@ -8,14 +8,21 @@ import { UpdateUserDto } from './types/dtos/update.user.dto';
 import { UserRepository } from './repositories/user.repository';
 import { RoleUser } from 'src/auth/entities/role.entity';
 import { User } from './entities/user.entity';
+import { ReservationTable } from 'src/reservations/entities/reservation.entity';
+import { ReservationRepository } from 'src/reservations/repositories/reservation.repository';
+import { MoreThan, Repository } from 'typeorm';
 
 @Injectable()
 export class UserService {
   constructor(
     @InjectRepository(User)
-    private readonly userRepository: UserRepository,
+    private readonly userRepository: Repository<User>,
+
     @InjectRepository(RoleUser)
-    private readonly roleRepository: RoleRepository,
+    private readonly roleRepository: Repository<RoleUser>,
+
+    @InjectRepository(ReservationTable)
+    private readonly reservationRepository: Repository<ReservationTable>,
 
   ) { }
   public generateRandomPassword(length = 8): string {
@@ -137,6 +144,7 @@ export class UserService {
 
   async deleteUser(id: string) {
     console.log("ID reçu pour suppression:", id);
+
     const user = await this.userRepository.findOneBy({ id });
 
     if (!user) {
@@ -144,6 +152,24 @@ export class UserService {
       throw new NotFoundException(`L'utilisateur avec l'ID ${id} n'existe pas`);
     }
 
+    const now = new Date();
+
+    // Vérifie uniquement les réservations futures
+    const futureReservations = await this.reservationRepository.find({
+      where: {
+        user: { id },
+        reservationTime: {
+          date2: MoreThan(now),
+        },
+      },
+      relations: ['reservationTime'],
+    });
+
+    if (futureReservations.length > 0) {
+      throw new BadRequestException("Impossible de supprimer l'utilisateur : il a des réservations à venir.");
+    }
+
+    // 🔥 Si arrivé ici, il a zéro résa future → suppression autorisée
     await this.userRepository.delete(id);
     return { message: 'Utilisateur supprimé avec succès.' };
   }

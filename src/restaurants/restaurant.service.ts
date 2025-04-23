@@ -245,5 +245,10 @@ export class RestaurantService {
 
 
 
+  async findAllWithMenus(): Promise<Restaurant[]> {
+    return this.restaurantRepository.find({
+      relations: ['menuRestaurant', 'menuRestaurant.plats'], // important !
+    });
+  }
 
 }

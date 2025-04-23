@@ -7,6 +7,8 @@ import { TableRestaurant } from './entities/table.entity';
 import { RestaurantBlocRepository } from 'src/restaurants/repositories/restaurant-bloc.repository';
 import { RestaurantBloc } from 'src/restaurants/entities/Restaurant-Bloc.entity';
 import { TableStatus } from './enums/status.enums';
+import { ReservationTable } from 'src/reservations/entities/reservation.entity';
+import { ReservationRepository } from 'src/reservations/repositories/reservation.repository';
 
 
 @Injectable()
@@ -15,7 +17,9 @@ export class TablesService {
     @InjectRepository(TableRestaurant)
     private readonly TableRepository: TableRepository,
     @InjectRepository(RestaurantBloc)
-    private readonly restaurantBlocRepository: RestaurantBlocRepository) { }
+    private readonly restaurantBlocRepository: RestaurantBlocRepository,
+    @InjectRepository(ReservationTable)
+    private readonly reservationRepository: ReservationRepository,) { }
 
 
   async createTable(dto: CreateTableDto): Promise<TableRestaurant> {
@@ -56,6 +60,7 @@ export class TablesService {
       view: dto.view,
       row: dto.row,
       col: dto.col,
+      shape: dto.shape,
       restaurantBloc: bloc,
     });
 
@@ -91,31 +96,51 @@ export class TablesService {
 
     return table;
   }
-
   async updateTable(id: string, updateTableDto: UpdateTableDto) {
-    const table = await this.TableRepository.findOneBy({ id });
+    const table = await this.TableRepository.findOne({
+      where: { id },
+      relations: ['reservations'],
+    });
 
     if (!table) {
       throw new NotFoundException(`Table with ID ${id} not found`);
+    }
+
+    const hasReservations = table.reservations?.length > 0;
+
+    if (hasReservations) {
+      throw new BadRequestException(
+        'Impossible de modifier cette table car elle est déjà réservée.'
+      );
     }
 
     Object.assign(table, updateTableDto);
     return await this.TableRepository.save(table);
   }
 
+
+
   async delete(id: string) {
     const table = await this.TableRepository.findOne({ where: { id } });
 
     if (!table) {
-      throw new NotFoundException('Table not found');
+      throw new NotFoundException(`Table avec l'ID ${id} non trouvée.`);
     }
 
-    try {
-      await this.TableRepository.delete(id);
-    } catch (error) {
-      console.error('Erreur lors de la suppression :', error);
-      throw new InternalServerErrorException('Impossible de supprimer la table.');
+    // Vérifie si la table est liée à une réservation non annulée
+    const activeReservations = await this.reservationRepository.count({
+      where: {
+        table: { id },
+        isCancelled: false,
+      },
+    });
+
+    if (activeReservations > 0) {
+      throw new BadRequestException('Impossible de supprimer cette table : elle est actuellement réservée.');
     }
+
+    await this.TableRepository.delete(id);
+    return { message: 'Table supprimée avec succès.' };
   }
 
 

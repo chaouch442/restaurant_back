@@ -15,11 +15,12 @@ import { ReservationTimeRepository } from './repositories/reservation-time.repos
 import { RestaurantModule } from 'src/restaurants/restaurant.module';
 import { SystemConfig } from 'src/config/entities/config.entity';
 import { SystemConfigRepository } from 'src/config/repositories/system-config.repository';
+import { SystemConfigService } from 'src/config/config.service';
 
 @Module({
   imports: [TypeOrmModule.forFeature([ReservationTable, Restaurant, TableRestaurant, User, MenuRestaurant, Plat, ReservationTime, SystemConfig]), RestaurantModule,],
   controllers: [ReservationController],
-  providers: [ReservationsService, ReservationRepository, ReservationTimeRepository, SystemConfigRepository],
-  exports: [ReservationsService, ReservationRepository, ReservationTimeRepository, SystemConfigRepository],
+  providers: [ReservationsService, ReservationRepository, ReservationTimeRepository, SystemConfigRepository, SystemConfigService],
+  exports: [ReservationsService, ReservationRepository, ReservationTimeRepository, SystemConfigRepository, SystemConfigService],
 })
 export class ReservationsModule { }

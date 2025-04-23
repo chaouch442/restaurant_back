@@ -1,8 +1,9 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { Entity, PrimaryGeneratedColumn, Column, ManyToOne } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, OneToMany } from 'typeorm';
 import { TableStatus } from '../enums/status.enums';
 import { RestaurantBloc } from 'src/restaurants/entities/Restaurant-Bloc.entity';
 import { ViewType } from '../enums/view.enums';
+import { ReservationTable } from 'src/reservations/entities/reservation.entity';
 
 @Entity()
 export class TableRestaurant {
@@ -26,10 +27,14 @@ export class TableRestaurant {
   @Column({ nullable: true })
   col: number;
 
+  @Column({ default: 'circle' })
+  shape: string;
 
   @ManyToOne(() => RestaurantBloc, (rb) => rb.tables, { eager: true, onDelete: 'CASCADE' })
   restaurantBloc: RestaurantBloc;
 
+  @OneToMany(() => ReservationTable, (reservation) => reservation.table)
+  reservations: ReservationTable[];
 
 
 }
