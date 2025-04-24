@@ -6,9 +6,9 @@ import { RestaurantRepository } from 'src/restaurants/repositories/restaurant.re
 import { TableRepository } from 'src/tables/repositories/table.repository';
 import { Plat } from 'src/plats/entities/plat.entity';
 import { platRepository } from 'src/plats/repositories/plat.repository';
-import { getMealTime } from 'src/plats/utils/getMealTime';
+
 import { UserRepository } from 'src/user/repositories/user.repository';
-import { FindOptionsWhere, In, LessThanOrEqual } from 'typeorm';
+
 import { UpdateReservationDto } from './types/dtos/update-reservation.dto';
 import { Cron, CronExpression } from '@nestjs/schedule';
 import { TableStatus } from 'src/tables/enums/status.enums';
@@ -22,7 +22,7 @@ import { SystemConfigRepository } from 'src/config/repositories/system-config.re
 import { ReservationTime } from './entities/reservation-time.entity';
 import { ReservationTimeRepository } from './repositories/reservation-time.repository';
 import moment from 'moment';
-import { CreateReservationTimeDto } from './types/dtos/create-reservation-time.dto';
+
 import { SystemConfigService } from 'src/config/config.service';
 
 @Injectable()
@@ -56,17 +56,19 @@ export class ReservationsService {
 
   @Cron(CronExpression.EVERY_MINUTE)
   async updateReservationStatus() {
-    const now = new Date();
+    const now = moment();
 
     const reservations = await this.reservationRepository.find({
-      where: {
-        status: ReservationStatus.ACTIVE,
-      },
+      where: { status: ReservationStatus.ACTIVE },
       relations: ['reservationTime', 'table'],
     });
 
-    const finishedReservations = reservations.filter((res) =>
-      res.reservationTime?.startTime && new Date(res.reservationTime.startTime) <= now)
+    const finishedReservations = reservations.filter(res => {
+      if (!res.reservationTime?.date2 || !res.reservationTime?.endTime) return false;
+
+      const finMoment = moment(`${res.reservationTime.date2}T${res.reservationTime.endTime}`);
+      return now.isAfter(finMoment);
+    });
 
     for (const reservation of finishedReservations) {
       if (reservation.table) {
@@ -78,6 +80,7 @@ export class ReservationsService {
       await this.reservationRepository.save(reservation);
     }
   }
+
 
 
   // async createReservation(createReservationDto: CreateReservationDto, user) {

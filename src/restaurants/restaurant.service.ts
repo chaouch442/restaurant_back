@@ -29,7 +29,7 @@ export class RestaurantService {
   async getRestaurantById(id: string) {
     const fetchedRestaurant = await this.restaurantRepository.findOne({
       where: { id },
-      relations: ['restaurantBlocs', 'restaurantBlocs.bloc', 'images']
+      relations: ['restaurantBlocs', 'restaurantBlocs.bloc', 'images',]
     });
 
 
@@ -245,9 +245,9 @@ export class RestaurantService {
 
 
 
-  async findAllWithMenus(): Promise<Restaurant[]> {
+  async getRestaurantWithMenus(id: string) {
     return this.restaurantRepository.find({
-      relations: ['menuRestaurant', 'menuRestaurant.plats'], // important !
+      relations: ['menuRestaurant', 'menuRestaurant.plats'],
     });
   }
 

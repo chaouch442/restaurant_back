@@ -29,6 +29,7 @@ import { BlocModule } from './bloc/bloc.module';
 import { Bloc } from './bloc/entities/bloc.entity';
 import { RestaurantImage } from './image/image.entity';
 import { RestaurantBloc } from './restaurants/entities/Restaurant-Bloc.entity';
+import { ScheduleModule } from '@nestjs/schedule';
 
 
 
@@ -36,6 +37,7 @@ import { RestaurantBloc } from './restaurants/entities/Restaurant-Bloc.entity';
 @Module({
   imports: [
     ConfigModule.forRoot({ isGlobal: true }),
+    ScheduleModule.forRoot(),
     TypeOrmModule.forRootAsync({
       imports: [CustomConfigModule],
       useFactory: () => ({
@@ -62,7 +64,7 @@ import { RestaurantBloc } from './restaurants/entities/Restaurant-Bloc.entity';
     CustomConfigModule,
     BlocModule,
     // CustomerModule
-
+    ScheduleModule
 
   ],
   controllers: [AppController, ModuleController, BlocController],

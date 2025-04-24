@@ -21,9 +21,13 @@ export class BlocController {
     return this.blocService.findAll();
   }
 
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.blocService.findOne(id);
+  @Get(':blocId/:restaurantId')
+  getBlocWithRestaurant(
+    @Param('blocId') blocId: string,
+    @Param('restaurantId') restaurantId: string,
+  ) {
+    return this.blocService.getBlocByIdFiltered(blocId, restaurantId);
   }
+
 
 }

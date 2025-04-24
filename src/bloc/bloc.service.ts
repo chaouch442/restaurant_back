@@ -1,5 +1,5 @@
 
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Bloc } from './entities/bloc.entity';
 import { BlocRepository } from './repositories/bloc.repository';
@@ -27,14 +27,31 @@ export class BlocService {
 
 
 
-  async findOne(id: string): Promise<Bloc | null> {
-    return this.blocRepository.findOne({
-      where: { id },
-      relations: [
-        'restaurantBlocs',
-        'restaurantBlocs.tables'
-      ],
+  async getBlocByIdFiltered(blocId: string, restaurantId: string) {
+    const bloc = await this.blocRepository.findOne({
+      where: { id: blocId },
+      relations: {
+        restaurantBlocs: {
+          restaurant: true,
+          tables: true,
+        },
+      },
     });
+
+    if (!bloc) {
+      throw new NotFoundException('Bloc non trouvé');
+    }
+    if (!bloc.restaurantBlocs) {
+      bloc.restaurantBlocs = [];
+    }
+
+    bloc.restaurantBlocs = bloc.restaurantBlocs.filter(
+      (rb) => rb.restaurant && rb.restaurant.id === restaurantId,
+    );
+
+
+    return bloc;
   }
+
 
 }

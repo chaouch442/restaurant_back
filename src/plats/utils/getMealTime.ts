@@ -1,5 +1,5 @@
 import { MealTime } from 'src/plats/enums/meal-time.enum';
-import * as moment from 'moment';
+import moment from 'moment';
 
 export function getMealTime(dateTime: string): MealTime {
   const hour = moment(dateTime).hour();

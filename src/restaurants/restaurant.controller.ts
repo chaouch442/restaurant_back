@@ -63,10 +63,9 @@ export class RestaurantController {
   async toggleRestaurantActive(@Param('id', ParseUUIDPipe) id: string) {
     return this.restaurantService.toggleActive(id);
   }
-
-  @Get('with-menus')
-  getRestaurantsWithMenus() {
-    return this.restaurantService.findAllWithMenus();
+  @Get(':id/with-menus')
+  getRestaurantWithMenus(@Param('id') id: string) {
+    return this.restaurantService.getRestaurantWithMenus(id);
   }
 
 
