@@ -1,17 +1,19 @@
 import { Controller, Get, Post, Delete, Patch, Body, Param, ParseUUIDPipe, UseGuards, Query } from '@nestjs/common';
-import { ApiQuery, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiQuery, ApiTags } from '@nestjs/swagger';
 import { RestaurantService } from './restaurant.service';
 import { CreateRestaurantDto } from './types/dto/create-restaurant.dto';
 import { Roles } from 'src/auth/decorators/roles.decorator';
 import { RolesGuard } from 'src/auth/guards/roles.guard';
 import { UpdateRestaurantDto } from './types/dto/update-restaurant.dto';
+import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
 
 
 
 
+// @ApiBearerAuth('access-token')
 @ApiTags('restaurants')
 @Controller('restaurant')
-@UseGuards(RolesGuard)
+@UseGuards(JwtAuthGuard, RolesGuard)
 export class RestaurantController {
   constructor(private readonly restaurantService: RestaurantService) { }
 

@@ -24,7 +24,7 @@ import { ReservationTable } from 'src/reservations/entities/reservation.entity';
       global: true,
       //  secret: process.env.JWT_SECRET || 'super_secret_key', 
       secret: jwtConstants.secret,
-      signOptions: { expiresIn: '5h' },
+      signOptions: { expiresIn: '24h' },
     }),
     MailModule,
   ],

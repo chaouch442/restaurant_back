@@ -32,6 +32,7 @@ export class User {
 
 
 
+
   @Column('text', { nullable: true })
   resetToken: string | null;
 

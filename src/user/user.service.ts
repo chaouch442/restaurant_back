@@ -70,7 +70,7 @@ export class UserService {
   }
 
   async createUser(createUserDto: CreateUserDto) {
-    const { email, name, lastname, role, phone, dateDebutContrat } = createUserDto;
+    const { email, name, lastname, role, phone, password, dateDebutContrat } = createUserDto;
 
 
     const existingUser = await this.userRepository.findOneBy({ email });
@@ -81,9 +81,10 @@ export class UserService {
     if (role === 'admin') {
       throw new BadRequestException("Un admin ne peut pas créer un autre admin.");
     }
-    const randomPassword = this.generateRandomPassword();
-    console.log('Generated Password:', randomPassword);
-    const hashedPassword = await bcrypt.hash(randomPassword, 10);
+    const hashedPassword = await bcrypt.hash(createUserDto.password, 10);
+    // const randomPassword = this.generateRandomPassword();
+    // console.log('Generated Password:', randomPassword);
+    // const hashedPassword = await bcrypt.hash(randomPassword, 10);
 
 
     let roleEntity = await this.roleRepository.findOneBy({ name: role });
@@ -100,6 +101,7 @@ export class UserService {
       phone,
       dateDebutContrat,
       password: hashedPassword,
+      // password: hashedPassword,
       role: roleEntity,
     });
 

@@ -5,24 +5,26 @@ import { RolesGuard } from 'src/auth/guards/roles.guard';
 import { CreateUserDto } from './types/dtos/create.user.dto';
 import { ApiTags } from '@nestjs/swagger';
 import { UpdateUserDto } from './types/dtos/update.user.dto';
+import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
+
 
 @ApiTags('users')
 @Controller('user')
-@UseGuards(RolesGuard)
+@UseGuards(JwtAuthGuard, RolesGuard)
 export class UserController {
-  constructor(private readonly userService: UserService) {}
-//route pour cree le role tbadel role tnajem
+  constructor(private readonly userService: UserService) { }
+
   @Post(':userId/assign-role/:roleName')
-@UseGuards(RolesGuard)
-   @Roles('admin')
-   assignRole(@Param('userId') userId: string, @Param('roleName') roleName: string) {
-   return this.userService.assignRoleToUser(userId, roleName);
-   }
-@Post('create')
-@Roles('admin') // Seul l'admin peut créer un user
-async createUser(@Body() createUserDto: CreateUserDto) {
-  return this.userService.createUser(createUserDto);
-}
+  @UseGuards(RolesGuard)
+  @Roles('admin')
+  assignRole(@Param('userId') userId: string, @Param('roleName') roleName: string) {
+    return this.userService.assignRoleToUser(userId, roleName);
+  }
+  @Post('create')
+  @Roles('admin')
+  async createUser(@Body() createUserDto: CreateUserDto) {
+    return this.userService.createUser(createUserDto);
+  }
 
   @Get(':id')
   @Roles('admin')
@@ -44,8 +46,8 @@ async createUser(@Body() createUserDto: CreateUserDto) {
   @Delete(':id')
   @Roles('admin')
   async deleteUser(@Param('id', ParseIntPipe) id: string) {
-      console.log("Tentative de suppression de l'utilisateur avec ID:", id);
-      return this.userService.deleteUser(id);
+    console.log("Tentative de suppression de l'utilisateur avec ID:", id);
+    return this.userService.deleteUser(id);
   }
-  
+
 }

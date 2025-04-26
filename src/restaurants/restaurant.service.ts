@@ -26,12 +26,38 @@ export class RestaurantService {
 
     ) { }
 
+  // async getRestaurantById(id: string) {
+  //   const fetchedRestaurant = await this.restaurantRepository.findOne({
+  //     where: { id },
+  //     relations: ['restaurantBlocs', 'restaurantBlocs.bloc', 'images',]
+  //   });
+
+
+  //   if (!fetchedRestaurant) {
+  //     throw new BadRequestException(`Restaurant with ID ${id} not found`);
+  //   }
+
+  //   if (fetchedRestaurant.hourly) {
+  //     const [start, end] = fetchedRestaurant.hourly.split('-');
+  //     const nowHour = new Date().getHours();
+
+  //     const startHour = parseInt(start);
+  //     const endHour = parseInt(end);
+
+  //     const isOpen = nowHour >= startHour && nowHour < endHour;
+  //     fetchedRestaurant.status = isOpen ? RestaurantStatus.OUVERT : RestaurantStatus.FERME;
+  //   }
+
+  //   return fetchedRestaurant;
+  // }
+
+
+
   async getRestaurantById(id: string) {
     const fetchedRestaurant = await this.restaurantRepository.findOne({
       where: { id },
-      relations: ['restaurantBlocs', 'restaurantBlocs.bloc', 'images',]
+      relations: ['restaurantBlocs', 'restaurantBlocs.bloc', 'images'],
     });
-
 
     if (!fetchedRestaurant) {
       throw new BadRequestException(`Restaurant with ID ${id} not found`);
@@ -44,13 +70,31 @@ export class RestaurantService {
       const startHour = parseInt(start);
       const endHour = parseInt(end);
 
-      const isOpen = nowHour >= startHour && nowHour < endHour;
+      let isOpen = false;
+
+      if (!isNaN(startHour) && !isNaN(endHour)) {
+        if (startHour < endHour) {
+          isOpen = nowHour >= startHour && nowHour < endHour;
+        } else {
+          // pour les horaires de nuit (ex: 20-02)
+          isOpen = nowHour >= startHour || nowHour < endHour;
+        }
+      }
+
+      console.log({
+        id,
+        hourly: fetchedRestaurant.hourly,
+        nowHour,
+        startHour,
+        endHour,
+        isOpen,
+      });
+
       fetchedRestaurant.status = isOpen ? RestaurantStatus.OUVERT : RestaurantStatus.FERME;
     }
 
     return fetchedRestaurant;
   }
-
 
 
 

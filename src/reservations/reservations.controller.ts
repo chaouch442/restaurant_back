@@ -1,5 +1,5 @@
 import { Body, Controller, Delete, Get, NotFoundException, Param, ParseUUIDPipe, Patch, Post, UseGuards } from '@nestjs/common';
-import { ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { ReservationsService } from './reservations.service';
 import { CreateReservationDto } from './types/dtos/create-reservation.dto';
 import { RolesGuard } from 'src/auth/guards/roles.guard';
@@ -9,10 +9,12 @@ import { UpdateReservationDto } from './types/dtos/update-reservation.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { ReservationTable } from './entities/reservation.entity';
 import { User } from 'src/user/entities/user.entity';
-
+import { Roles } from 'src/auth/decorators/roles.decorator';
+@UseGuards(JwtAuthGuard, RolesGuard)
+@ApiBearerAuth('access-token')
 @ApiTags('reservations')
 @Controller('reservations')
-@UseGuards(RolesGuard)
+
 export class ReservationController {
 
   constructor(private readonly reservationService: ReservationsService,
@@ -20,8 +22,8 @@ export class ReservationController {
     private readonly reservationRepository,
   ) { }
 
-  @UseGuards(JwtAuthGuard)
   @Post()
+  @Roles('admin', 'costumer')
   async createReservation(
     @Body() createReservationDto: CreateReservationDto,
     @userId() user: User,
@@ -32,22 +34,25 @@ export class ReservationController {
   }
 
   @Get(':id')
+  @Roles('admin', 'customer')
   async getReservationById(@Param('id', ParseUUIDPipe) id: string) {
     console.log("ID reçu :", id);
     return this.reservationService.getReservationById(id);
   }
   @Get()
+  @Roles('admin', 'customer')
   async getReservation() {
     return this.reservationService.getReservation();
   }
   @Patch(':id')
-  @UseGuards(JwtAuthGuard)
+  @Roles('admin', 'customer')
+
   async updateReservation(@Param('id') id: string, @Body() updatereservationDto: UpdateReservationDto, @userId() user: any,) {
     console.log('updateReservationDto:', updatereservationDto);
     return this.reservationService.updateReservation(id, updatereservationDto, user);
   }
   @Delete(':id')
-  @UseGuards(JwtAuthGuard)
+  @Roles('admin', 'customer')
   async deleteReservation(@Param('id', ParseUUIDPipe) id: string, @userId() user: User,) {
     return this.reservationService.deleteReservation(id, user);
   }

@@ -6,13 +6,13 @@ import { ApiProperty } from '@nestjs/swagger';
 export class MealTimeEntity {
   @PrimaryGeneratedColumn('uuid')
   id: string;
-@ApiProperty() 
+
   @Column({ type: 'enum', enum: MealTime })
   mealTime: MealTime;
-@ApiProperty() 
+
   @Column({ type: 'time' })
   startTime: string;
-@ApiProperty() 
+
   @Column({ type: 'time' })
   endTime: string;
 }

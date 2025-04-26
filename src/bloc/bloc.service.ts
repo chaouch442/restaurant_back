@@ -41,14 +41,11 @@ export class BlocService {
     if (!bloc) {
       throw new NotFoundException('Bloc non trouvé');
     }
-    if (!bloc.restaurantBlocs) {
-      bloc.restaurantBlocs = [];
-    }
 
-    bloc.restaurantBlocs = bloc.restaurantBlocs.filter(
-      (rb) => rb.restaurant && rb.restaurant.id === restaurantId,
-    );
-
+    // ✅ Remplacement du filtrage classique
+    bloc.restaurantBlocs = bloc.restaurantBlocs?.filter(
+      (rb) => rb.restaurant?.id === restaurantId
+    ) || [];
 
     return bloc;
   }
