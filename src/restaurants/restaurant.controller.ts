@@ -11,9 +11,11 @@ import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
 
 
 // @ApiBearerAuth('access-token')
+
+@UseGuards(JwtAuthGuard, RolesGuard)
+@ApiBearerAuth('access-token')
 @ApiTags('restaurants')
 @Controller('restaurant')
-@UseGuards(JwtAuthGuard, RolesGuard)
 export class RestaurantController {
   constructor(private readonly restaurantService: RestaurantService) { }
 

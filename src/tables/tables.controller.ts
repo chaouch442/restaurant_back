@@ -1,5 +1,5 @@
 import { Body, Controller, Delete, Get, Param, ParseUUIDPipe, Patch, Post, UseGuards } from '@nestjs/common';
-import { ApiBody, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiBody, ApiTags } from '@nestjs/swagger';
 import { TablesService } from './tables.service';
 import { CreateTableDto } from './types/dtos/create-table.dto';
 import { UpdateTableDto } from './types/update-table.dto';
@@ -9,9 +9,11 @@ import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
 
 
 
+
+@UseGuards(JwtAuthGuard, RolesGuard)
+@ApiBearerAuth('access-token')
 @ApiTags('tables')
 @Controller('tables')
-@UseGuards(JwtAuthGuard, RolesGuard)
 export class TablesController {
   constructor(private readonly tableService: TablesService) { }
 
