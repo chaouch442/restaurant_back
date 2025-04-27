@@ -78,6 +78,11 @@ export class ReservationsService {
 
       reservation.status = ReservationStatus.FINISHED;
       await this.reservationRepository.save(reservation);
+
+      await this.reservationRepository.delete(reservation.id);
+      console.log(`Reservation ${reservation.id} terminée et supprimée.`);
+
+
     }
   }
 
@@ -403,19 +408,21 @@ export class ReservationsService {
       throw new NotFoundException(`Réservation avec l'ID ${id} introuvable`);
     }
 
-    if (reservation.user.id !== user.id) {
-      throw new UnauthorizedException("Vous ne pouvez supprimer que vos propres réservations");
-    }
+    // if (!reservation.user || reservation.user.id !== user.id) {
+    //   throw new UnauthorizedException("Vous ne pouvez supprimer que vos propres réservations");
+    // }
 
     const now = new Date();
-
 
     if (!reservation.reservationTime?.date2 || !reservation.reservationTime?.endTime) {
       throw new BadRequestException("Les informations de temps de réservation sont incomplètes.");
     }
 
+    // 🛠 Correction ici :
+    const date2 = new Date(reservation.reservationTime.date2);
+
     const fullEndDateTime = new Date(
-      `${reservation.reservationTime.date2.toISOString().split('T')[0]}T${reservation.reservationTime.endTime}:00`
+      `${date2.toISOString().split('T')[0]}T${reservation.reservationTime.endTime}:00`
     );
 
     const isCancellable =
