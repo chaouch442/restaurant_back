@@ -1,4 +1,4 @@
-import { IsString, IsNotEmpty, IsUrl, IsEnum, IsOptional } from 'class-validator';
+import { IsString, IsNotEmpty, IsUrl, IsEnum, IsOptional, IsArray, IsUUID } from 'class-validator';
 import { MealTime } from 'src/plats/enums/meal-time.enum';
 
 export class CreatePlatDto {
@@ -14,10 +14,10 @@ export class CreatePlatDto {
   @IsString()
   image?: string;
 
+  @IsArray()
+  @IsUUID('all', { each: true }) // chaque id dans le tableau doit être un UUID
   @IsNotEmpty()
-  @IsEnum(MealTime)
-  mealTime: MealTime;
-
+  mealTimeIds: string[];
 
   @IsString()
   @IsNotEmpty()

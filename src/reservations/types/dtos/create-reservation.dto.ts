@@ -20,7 +20,7 @@ export class CreateReservationDto {
 
 
 
-  @ApiProperty()
+  @ApiProperty({ required: false, type: [String] })
   @IsOptional()
   platIds: string[];
 

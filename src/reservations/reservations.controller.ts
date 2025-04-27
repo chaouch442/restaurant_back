@@ -10,6 +10,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { ReservationTable } from './entities/reservation.entity';
 import { User } from 'src/user/entities/user.entity';
 import { Roles } from 'src/auth/decorators/roles.decorator';
+import { CreateMealTimeDto } from 'src/plats/types/dtos/create-meal-time.dto';
 @UseGuards(JwtAuthGuard, RolesGuard)
 @ApiBearerAuth('access-token')
 @ApiTags('reservations')
@@ -73,6 +74,25 @@ export class ReservationController {
       table: reservation.table,
       restaurant: reservation.restaurant,
     };
+  }
+
+
+  @Get()
+  async getMealTimes() {
+    return await this.reservationService.getMealTimes();
+  }
+
+
+  @Get('/meal-times/:id')
+  async getMealTimeById(@Param('id', ParseUUIDPipe) id: string) {
+    return this.reservationService.getMealTimeById(id);
+  }
+
+
+
+  @Post('/meal-times')
+  async createMealTime(@Body() createMealTimeDto: CreateMealTimeDto) {
+    return await this.reservationService.createMealTime(createMealTimeDto);
   }
 
 }

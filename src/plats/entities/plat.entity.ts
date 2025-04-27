@@ -1,7 +1,9 @@
-import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, ManyToMany } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, ManyToMany, JoinTable } from 'typeorm';
 import { MealTime } from '../enums/meal-time.enum';
 import { MenuRestaurant } from 'src/menu/entities/menu.entity';
 import { ReservationTable } from 'src/reservations/entities/reservation.entity';
+import { MealTimeEntity } from './meal-time.entity';
+import { TableRestaurant } from 'src/tables/entities/table.entity';
 
 
 @Entity()
@@ -25,8 +27,7 @@ export class Plat {
   @Column({ nullable: true })
   description: string
 
-  @Column({ type: 'enum', enum: MealTime })
-  mealTime: MealTime;
+
 
   @ManyToOne(() => MenuRestaurant, (menu) => menu.plats, {
     onDelete: 'CASCADE',
@@ -37,7 +38,9 @@ export class Plat {
   @ManyToMany(() => ReservationTable, (reservation) => reservation.plats)
   reservations: ReservationTable[];
 
-
+  @ManyToMany(() => MealTimeEntity, { eager: true })
+  @JoinTable()
+  mealTimes: MealTimeEntity[];
 
 
 }

@@ -24,6 +24,11 @@ import { ReservationTimeRepository } from './repositories/reservation-time.repos
 import moment from 'moment';
 
 import { SystemConfigService } from 'src/config/config.service';
+import { MealTimeEntity } from 'src/plats/entities/meal-time.entity';
+import { In, Repository } from 'typeorm';
+
+import { CreateMealTimeDto } from 'src/plats/types/dtos/create-meal-time.dto';
+import { MealTime } from './interfaces/mealTime-interface';
 
 @Injectable()
 export class ReservationsService {
@@ -50,6 +55,10 @@ export class ReservationsService {
     @InjectRepository(ReservationTime)
     private readonly reservationTimeRepository: ReservationTimeRepository,
     private readonly systemconfigService: SystemConfigService,
+
+
+    @InjectRepository(MealTimeEntity)
+    private readonly mealTimeRepository: Repository<MealTimeEntity>
 
 
   ) { }
@@ -253,9 +262,15 @@ export class ReservationsService {
       throw new BadRequestException('Le créneau de réservation doit appartenir entièrement à un seul type de repas : breakfast, lunch ou dinner.');
     }
 
-    const plats = await this.platrepository.findByIds(platIds);
+    let plats: Plat[] = [];
+    if (platIds && platIds.length > 0) {
+      plats = await this.platrepository.find({
+        where: { id: In(platIds) },
+        relations: ['mealTimes'],
+      });
+    }
 
-    await validatePlatsCoherence(platIds, reservationTime.startTime, reservationTime.endTime, plats);
+    await validatePlatsCoherence(platIds, reservationTime.startTime, reservationTime.endTime, plats, this.mealTimeRepository);
     await this.reservationTimeRepository.save(reservationTime);
     const reservation = this.reservationRepository.create({
       customerName,
@@ -282,8 +297,22 @@ export class ReservationsService {
 
 
 
+  async getMealTimes() {
+    return await this.mealTimeRepository.find();
+  }
 
+  async getMealTimeById(id: string) {
+    return await this.mealTimeRepository.findOneBy({ id });
+  }
 
+  async createMealTime(createMealTimeDto: CreateMealTimeDto) {
+    const mealTimeEntity = new MealTimeEntity();
+    mealTimeEntity.mealTime = createMealTimeDto.mealTime as MealTime;
+    mealTimeEntity.startTime = createMealTimeDto.startTime;
+    mealTimeEntity.endTime = createMealTimeDto.endTime;
+
+    return await this.mealTimeRepository.save(mealTimeEntity);
+  }
 
 
 
@@ -418,7 +447,7 @@ export class ReservationsService {
       throw new BadRequestException("Les informations de temps de réservation sont incomplètes.");
     }
 
-    // 🛠 Correction ici :
+
     const date2 = new Date(reservation.reservationTime.date2);
 
     const fullEndDateTime = new Date(
@@ -479,52 +508,147 @@ function validateReservationTime(debutDateTime, finDateTime, maxCancelTimeBefore
 }
 
 
-async function validatePlatsCoherence(platIds: string[], startTime: string, endTime: string, plats) {
-  const moment = require('moment');
+// async function validatePlatsCoherence(platIds: string[], startTime: string, endTime: string, plats) {
+//   const moment = require('moment');
+//   const reservationStart = moment(startTime, 'HH:mm');
+//   const reservationEnd = moment(endTime, 'HH:mm');
+
+//   const mealTimeRanges = {
+//     breakfast: { start: moment('08:00', 'HH:mm'), end: moment('12:00', 'HH:mm') },
+//     lunch: { start: moment('12:00', 'HH:mm'), end: moment('18:00', 'HH:mm') },
+//     dinner: { start: moment('18:00', 'HH:mm'), end: moment('23:59', 'HH:mm') },
+//   };
+
+//   for (const plat of plats) {
+//     const allowedRange = mealTimeRanges[plat.mealTime];
+
+//     const isStartInRange = reservationStart.isSameOrAfter(allowedRange.start) && reservationStart.isBefore(allowedRange.end);
+//     const isEndInRange = reservationEnd.isAfter(allowedRange.start) && reservationEnd.isSameOrBefore(allowedRange.end);
+
+//     if (!(isStartInRange && isEndInRange)) {
+//       throw new BadRequestException(
+//         `Le plat "${plat.name}" est disponible uniquement pour le ${plat.mealTime}, mais la réservation est en dehors de ce créneau.`
+//       );
+//     }
+//   }
+// }
+
+
+
+
+
+
+
+
+
+
+async function validatePlatsCoherence(
+  platIds: string[],
+  startTime: string,
+  endTime: string,
+  plats: Plat[],
+  mealTimeRepository: Repository<MealTimeEntity>
+) {
   const reservationStart = moment(startTime, 'HH:mm');
   const reservationEnd = moment(endTime, 'HH:mm');
 
-  const mealTimeRanges = {
-    breakfast: { start: moment('08:00', 'HH:mm'), end: moment('12:00', 'HH:mm') },
-    lunch: { start: moment('12:00', 'HH:mm'), end: moment('18:00', 'HH:mm') },
-    dinner: { start: moment('18:00', 'HH:mm'), end: moment('23:59', 'HH:mm') },
-  };
+  // Charger tous les MealTimes depuis la base
+  const allMealTimes = await mealTimeRepository.find();
 
-  for (const plat of plats) {
-    const allowedRange = mealTimeRanges[plat.mealTime];
+  if (!allMealTimes || allMealTimes.length === 0) {
+    throw new BadRequestException('Aucun type de repas configuré.');
+  }
 
-    const isStartInRange = reservationStart.isSameOrAfter(allowedRange.start) && reservationStart.isBefore(allowedRange.end);
-    const isEndInRange = reservationEnd.isAfter(allowedRange.start) && reservationEnd.isSameOrBefore(allowedRange.end);
+  // Trouver le mealTime correspondant au créneau de réservation
+  const matchingMealTime = allMealTimes.find((mealTime) => {
+    const mealStart = moment(mealTime.startTime, 'HH:mm');
+    const mealEnd = moment(mealTime.endTime, 'HH:mm');
+    return (
+      reservationStart.isSameOrAfter(mealStart) &&
+      reservationEnd.isSameOrBefore(mealEnd)
+    );
+  });
 
-    if (!(isStartInRange && isEndInRange)) {
-      throw new BadRequestException(
-        `Le plat "${plat.name}" est disponible uniquement pour le ${plat.mealTime}, mais la réservation est en dehors de ce créneau.`
-      );
+  if (!matchingMealTime) {
+    throw new BadRequestException('Le créneau de réservation ne correspond à aucun type de repas.');
+  }
+
+  // Vérifier que la liste des plats n'est pas vide
+  // if (!plats || plats.length === 0) {
+  //   throw new BadRequestException('Aucun plat trouvé avec les IDs fournis.');
+  // }
+
+  // Vérifier chaque plat
+  if (plats.length > 0) {
+    for (const plat of plats) {
+      if (!plat.mealTimes || plat.mealTimes.length === 0) {
+        throw new BadRequestException(`Le plat "${plat.name}" n'a pas de créneau horaire configuré.`);
+      }
+
+      const mealTimeIdsOfPlat = plat.mealTimes.map(mt => mt.id);
+
+      if (!mealTimeIdsOfPlat.includes(matchingMealTime.id)) {
+        throw new BadRequestException(
+          `Le plat "${plat.name}" n'est pas disponible pour le créneau sélectionné.`
+        );
+      }
     }
   }
 }
 
 
-function getMealTimeForRange(start: moment.Moment, end: moment.Moment): 'breakfast' | 'lunch' | 'dinner' | null {
-  const moment = require('moment');
-  const ranges = {
-    breakfast: { start: moment('08:00', 'HH:mm'), end: moment('12:00', 'HH:mm') },
-    lunch: { start: moment('12:00', 'HH:mm'), end: moment('18:00', 'HH:mm') },
-    dinner: { start: moment('18:00', 'HH:mm'), end: moment('23:59', 'HH:mm') },
-  };
 
-  for (const [mealTime, range] of Object.entries(ranges)) {
-    if (
-      start.isSameOrAfter(range.start) &&
-      end.isSameOrBefore(range.end)
-    ) {
+
+
+
+
+
+
+
+
+
+
+
+// function getMealTimeForRange(start: moment.Moment, end: moment.Moment): 'breakfast' | 'lunch' | 'dinner' | null {
+//   const moment = require('moment');
+//   const ranges = {
+//     breakfast: { start: moment('08:00', 'HH:mm'), end: moment('12:00', 'HH:mm') },
+//     lunch: { start: moment('12:00', 'HH:mm'), end: moment('18:00', 'HH:mm') },
+//     dinner: { start: moment('18:00', 'HH:mm'), end: moment('23:59', 'HH:mm') },
+//   };
+
+//   for (const [mealTime, range] of Object.entries(ranges)) {
+//     if (
+//       start.isSameOrAfter(range.start) &&
+//       end.isSameOrBefore(range.end)
+//     ) {
+//       return mealTime as 'breakfast' | 'lunch' | 'dinner';
+//     }
+//   }
+
+//   return null;
+// }
+
+
+
+
+const mealTimeRanges = {
+  breakfast: { start: '08:00', end: '12:00' },
+  lunch: { start: '12:00', end: '18:00' },
+  dinner: { start: '18:00', end: '23:59' },
+};
+
+export function getMealTimeForRange(start: moment.Moment, end: moment.Moment): 'breakfast' | 'lunch' | 'dinner' | null {
+  for (const [mealTime, range] of Object.entries(mealTimeRanges)) {
+    const rangeStart = moment(range.start, 'HH:mm');
+    const rangeEnd = moment(range.end, 'HH:mm');
+
+    if (start.isSameOrAfter(rangeStart) && end.isSameOrBefore(rangeEnd)) {
       return mealTime as 'breakfast' | 'lunch' | 'dinner';
     }
   }
-
   return null;
 }
-
 
 
 

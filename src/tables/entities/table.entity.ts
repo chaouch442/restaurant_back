@@ -4,6 +4,7 @@ import { TableStatus } from '../enums/status.enums';
 import { RestaurantBloc } from 'src/restaurants/entities/Restaurant-Bloc.entity';
 import { ViewType } from '../enums/view.enums';
 import { ReservationTable } from 'src/reservations/entities/reservation.entity';
+import { Plat } from 'src/plats/entities/plat.entity';
 
 @Entity()
 export class TableRestaurant {
@@ -35,6 +36,7 @@ export class TableRestaurant {
 
   @OneToMany(() => ReservationTable, (reservation) => reservation.table)
   reservations: ReservationTable[];
+
 
 
 }

@@ -5,10 +5,11 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { MenuRestaurant } from './entities/menu.entity';
 import { Plat } from 'src/plats/entities/plat.entity';
 import { Restaurant } from 'src/restaurants/entities/restaurant.entity';
+import { MealTimeEntity } from 'src/plats/entities/meal-time.entity';
 
 
 @Module({
-  imports: [TypeOrmModule.forFeature([MenuRestaurant, Plat, Restaurant])],
+  imports: [TypeOrmModule.forFeature([MenuRestaurant, Plat, Restaurant, MealTimeEntity])],
   controllers: [MenuController],
   providers: [MenuService],
 })

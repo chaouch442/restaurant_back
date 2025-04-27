@@ -16,9 +16,10 @@ import { RestaurantModule } from 'src/restaurants/restaurant.module';
 import { SystemConfig } from 'src/config/entities/config.entity';
 import { SystemConfigRepository } from 'src/config/repositories/system-config.repository';
 import { SystemConfigService } from 'src/config/config.service';
+import { MealTimeEntity } from 'src/plats/entities/meal-time.entity';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([ReservationTable, Restaurant, TableRestaurant, User, MenuRestaurant, Plat, ReservationTime, SystemConfig]), RestaurantModule,],
+  imports: [TypeOrmModule.forFeature([ReservationTable, Restaurant, TableRestaurant, User, MenuRestaurant, Plat, ReservationTime, SystemConfig, MealTimeEntity]), RestaurantModule,],
   controllers: [ReservationController],
   providers: [ReservationsService, ReservationRepository, ReservationTimeRepository, SystemConfigRepository, SystemConfigService],
   exports: [ReservationsService, ReservationRepository, ReservationTimeRepository, SystemConfigRepository, SystemConfigService],

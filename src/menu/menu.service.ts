@@ -1,6 +1,6 @@
 import { Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { DataSource, Repository } from 'typeorm';
+import { DataSource, In, Repository } from 'typeorm';
 
 import { CreateMenuDto } from './types/dtos/create-menu.dto';
 import { UpdateMenuDto } from './types/dtos/update-menu.dto';
@@ -8,6 +8,7 @@ import { MealTime } from 'src/plats/enums/meal-time.enum';
 import { MenuRestaurant } from './entities/menu.entity';
 import { Plat } from 'src/plats/entities/plat.entity';
 import { Restaurant } from 'src/restaurants/entities/restaurant.entity';
+import { MealTimeEntity } from 'src/plats/entities/meal-time.entity';
 
 @Injectable()
 export class MenuService {
@@ -21,33 +22,90 @@ export class MenuService {
     private platRepository: Repository<Plat>,
     @InjectRepository(Restaurant)
     private restaurantRepository: Repository<Restaurant>,
+
+
+    @InjectRepository(MealTimeEntity)
+    private mealTimeRepository: Repository<MealTimeEntity>,
     private dataSource: DataSource,
   ) { }
 
 
+  // async createMenu(createMenuDto: CreateMenuDto) {
+  //   const { plats, restaurantId, ...menuData } = createMenuDto;
+
+  //   const newMenu = this.menuRepository.create({
+  //     ...menuData,
+  //     restaurant: { id: restaurantId },
+  //   });
+  //   const savedMenu = await this.menuRepository.save(newMenu);
+
+  //   const platsReloaded: Plat[] = [];
+
+  //   for (const platDto of plats) {
+  //     // 1. Trouver les mealTimes correspondants
+  //     const mealTimes = await this.mealTimeRepository.findBy({
+  //       id: In(platDto.mealTimeIds),
+  //     });
+
+  //     const { mealTimeIds, ...rest } = platDto;
+
+  //     // 2. Créer et sauvegarder le plat avec ses MealTimes
+  //     const plat = this.platRepository.create({
+  //       ...rest,
+  //       menu: savedMenu,
+  //       mealTimes: mealTimes, // <=== Ici c'est bon !
+  //     });
+  //     const savedPlat = await this.platRepository.save(plat);
+
+  //     platsReloaded.push(savedPlat);
+  //   }
+
+  //   // 3. Retourner le menu avec plats + leurs mealtimes
+  //   return this.menuRepository.findOne({
+  //     where: { id: savedMenu.id },
+  //     relations: ['plats', 'plats.mealTimes', 'restaurant'],
+  //   });
+  // }
+
   async createMenu(createMenuDto: CreateMenuDto) {
     const { plats, restaurantId, ...menuData } = createMenuDto;
 
-    const newMenu = this.menuRepository.create({
+    const menu = this.menuRepository.create({
       ...menuData,
       restaurant: { id: restaurantId },
     });
+    const savedMenu = await this.menuRepository.save(menu);
 
-    const savedMenu = await this.menuRepository.save(newMenu);
+    for (const platDto of plats) {
+      const { mealTimeIds, ...platData } = platDto;
 
-    const platsWithMenu = plats.map((plat) => ({
-      ...plat,
-      menu: savedMenu,
+      const mealTimes = await this.mealTimeRepository.find({
+        where: { id: In(mealTimeIds) },
+      });
 
-    }));
+      if (mealTimes.length !== mealTimeIds.length) {
+        throw new Error(`Certains MealTimes sont introuvables.`);
+      }
 
-    await this.platRepository.save(platsWithMenu);
+      const plat = this.platRepository.create({
+        ...platData,
+        menu: savedMenu,
+        mealTimes,
+      });
 
-    return this.menuRepository.findOne({
+      await this.platRepository.save(plat);
+    }
+
+    return await this.menuRepository.findOne({
       where: { id: savedMenu.id },
-      relations: ['plats', 'restaurant'],
+      relations: ['plats', 'plats.mealTimes', 'restaurant'],
     });
   }
+
+
+
+
+
 
 
   async getMenu() {
@@ -134,15 +192,23 @@ export class MenuService {
   }
 
 
-  async getMenuByMealTime(mealTime: MealTime) {
-    return this.menuRepository.find({
-      relations: ['plats'],
-      where: { plats: { mealTime: mealTime } }
-    });
+  // async getMenuByMealTime(mealTime: MealTime) {
+  //   return this.menuRepository.find({
+  //     relations: ['plats'],
+  //     where: { plats: { mealTime: mealTime } }
+  //   });
+  // }
+
+
+
+  async getMenuByMealTime(mealTimeId: string) {
+    return this.menuRepository
+      .createQueryBuilder('menu')
+      .leftJoinAndSelect('menu.plats', 'plat')
+      .leftJoinAndSelect('plat.mealTimes', 'mealTime')
+      .where('mealTime.id = :mealTimeId', { mealTimeId })
+      .getMany();
   }
-
-
-
 
 
   async findMenusByRestaurantId(restaurantId: string): Promise<MenuRestaurant[]> {

@@ -30,6 +30,7 @@ import { Bloc } from './bloc/entities/bloc.entity';
 import { RestaurantImage } from './image/image.entity';
 import { RestaurantBloc } from './restaurants/entities/Restaurant-Bloc.entity';
 import { ScheduleModule } from '@nestjs/schedule';
+import { MealTimeEntity } from './plats/entities/meal-time.entity';
 
 
 
@@ -47,13 +48,13 @@ import { ScheduleModule } from '@nestjs/schedule';
         username: 'postgres',
         password: '0000',
         database: 'restaurants',
-        entities: [Restaurant, User, RoleUser, TableRestaurant, MenuRestaurant, Plat, ReservationTable, ReservationTime, SystemConfig, Bloc, RestaurantImage, RestaurantBloc],
+        entities: [Restaurant, User, RoleUser, TableRestaurant, MenuRestaurant, Plat, ReservationTable, ReservationTime, SystemConfig, Bloc, RestaurantImage, RestaurantBloc, MealTimeEntity],
         synchronize: true,
         logging: true,
       }),
     }),
 
-    TypeOrmModule.forFeature([User, RoleUser, Restaurant, TableRestaurant, MenuRestaurant, Plat, ReservationTable, ReservationTime, SystemConfig, Bloc, RestaurantImage, RestaurantBloc]),
+    TypeOrmModule.forFeature([User, RoleUser, Restaurant, TableRestaurant, MenuRestaurant, Plat, ReservationTable, ReservationTime, SystemConfig, Bloc, RestaurantImage, RestaurantBloc, MealTimeEntity]),
     RestaurantModule,
     AuthModule,
     UserModule,
