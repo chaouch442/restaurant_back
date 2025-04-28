@@ -97,6 +97,11 @@ export class ReservationsService {
 
 
 
+
+
+
+
+
   // async createReservation(createReservationDto: CreateReservationDto, user) {
 
   //   const { tableId, reservationDateTime, customerName, platIds } = createReservationDto;
@@ -388,6 +393,7 @@ export class ReservationsService {
       }
 
       reservation.reportCount += 1;
+      reservation.status = ReservationStatus.REPORTED; // Ajout important
     }
 
 

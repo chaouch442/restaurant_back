@@ -10,6 +10,12 @@ export class UpdateReservationDto extends PartialType(CreateReservationDto) {
     isCancelled?: boolean;
 
     @IsOptional()
+    @IsBoolean()
+    isReported?: boolean;
+
+
+
+    @IsOptional()
     @IsEnum(ReservationStatus)
     status?: ReservationStatus;
 
@@ -17,4 +23,15 @@ export class UpdateReservationDto extends PartialType(CreateReservationDto) {
     @IsOptional()
     @IsString()
     customerName?: string;
+
+
+
+    @IsOptional()
+    @IsString()
+    startTime?: string;
+
+    @IsOptional()
+    @IsString()
+    endTime?: string;
+
 }
