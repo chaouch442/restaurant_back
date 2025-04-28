@@ -113,7 +113,7 @@ export class MenuService {
   }
 
   async getMenuById(id: string) {
-    return this.menuRepository.findOne({ where: { id }, relations: ['plats'] });
+    return this.menuRepository.findOne({ where: { id }, relations: ['plats', 'plats.mealTimes'] });
   }
 
   async updateMenu(id: string, updateMenuDto: UpdateMenuDto) {

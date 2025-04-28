@@ -31,6 +31,9 @@ import { RestaurantImage } from './image/image.entity';
 import { RestaurantBloc } from './restaurants/entities/Restaurant-Bloc.entity';
 import { ScheduleModule } from '@nestjs/schedule';
 import { MealTimeEntity } from './plats/entities/meal-time.entity';
+import { MealTimeService } from './reservations/meal-time/meal-time.service';
+import { MealTimeController } from './reservations/meal-time/meal-time.controller';
+import { MealTimeModule } from './reservations/meal-time/meal-time.module';
 
 
 
@@ -65,10 +68,11 @@ import { MealTimeEntity } from './plats/entities/meal-time.entity';
     CustomConfigModule,
     BlocModule,
     // CustomerModule
-    ScheduleModule
+    ScheduleModule,
+    MealTimeModule
 
   ],
-  controllers: [AppController, ModuleController, BlocController],
-  providers: [AppService, PlatsService, BlocService],
+  controllers: [AppController, ModuleController, BlocController, MealTimeController],
+  providers: [AppService, PlatsService, BlocService, MealTimeService],
 })
 export class AppModule { }

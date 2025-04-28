@@ -297,23 +297,6 @@ export class ReservationsService {
 
 
 
-  async getMealTimes() {
-    return await this.mealTimeRepository.find();
-  }
-
-  async getMealTimeById(id: string) {
-    return await this.mealTimeRepository.findOneBy({ id });
-  }
-
-  async createMealTime(createMealTimeDto: CreateMealTimeDto) {
-    const mealTimeEntity = new MealTimeEntity();
-    mealTimeEntity.mealTime = createMealTimeDto.mealTime as MealTime;
-    mealTimeEntity.startTime = createMealTimeDto.startTime;
-    mealTimeEntity.endTime = createMealTimeDto.endTime;
-
-    return await this.mealTimeRepository.save(mealTimeEntity);
-  }
-
 
 
 

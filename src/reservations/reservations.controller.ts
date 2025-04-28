@@ -19,6 +19,7 @@ import { CreateMealTimeDto } from 'src/plats/types/dtos/create-meal-time.dto';
 export class ReservationController {
 
   constructor(private readonly reservationService: ReservationsService,
+
     @InjectRepository(ReservationTable)
     private readonly reservationRepository,
   ) { }
@@ -77,22 +78,6 @@ export class ReservationController {
   }
 
 
-  @Get()
-  async getMealTimes() {
-    return await this.reservationService.getMealTimes();
-  }
 
-
-  @Get('/meal-times/:id')
-  async getMealTimeById(@Param('id', ParseUUIDPipe) id: string) {
-    return this.reservationService.getMealTimeById(id);
-  }
-
-
-
-  @Post('/meal-times')
-  async createMealTime(@Body() createMealTimeDto: CreateMealTimeDto) {
-    return await this.reservationService.createMealTime(createMealTimeDto);
-  }
 
 }
