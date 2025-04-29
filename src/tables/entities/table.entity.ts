@@ -10,6 +10,10 @@ import { Plat } from 'src/plats/entities/plat.entity';
 export class TableRestaurant {
   @PrimaryGeneratedColumn('uuid')
   id: string;
+
+  @Column({ nullable: true })
+  name: string
+
   @ApiProperty()
   @Column()
   numChaises: number;

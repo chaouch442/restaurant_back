@@ -5,6 +5,12 @@ import { ReservationTable } from 'src/reservations/entities/reservation.entity';
 import { ViewType } from 'src/tables/enums/view.enums';
 
 export class CreateTableDto {
+
+
+  @ApiProperty()
+  @IsString()
+  name: string
+
   @ApiProperty()
   @IsInt()
   @Min(1, { message: 'Le nombre de chaises doit être au moins 1' })

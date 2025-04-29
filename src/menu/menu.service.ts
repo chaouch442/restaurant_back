@@ -115,7 +115,6 @@ export class MenuService {
   async getMenuById(id: string) {
     return this.menuRepository.findOne({ where: { id }, relations: ['plats', 'plats.mealTimes'] });
   }
-
   async updateMenu(id: string, updateMenuDto: UpdateMenuDto) {
     const queryRunner = this.dataSource.createQueryRunner();
     await queryRunner.connect();
@@ -124,60 +123,58 @@ export class MenuService {
     try {
       const menuRepository = queryRunner.manager.getRepository(MenuRestaurant);
       const platRepository = queryRunner.manager.getRepository(Plat);
+      const mealTimeRepository = queryRunner.manager.getRepository(MealTimeEntity);
 
-      const existingMenu = await menuRepository.findOne({
+      const existingMenu = await this.menuRepository.findOne({
         where: { id },
         relations: ['plats', 'restaurant'],
       });
 
-      if (!existingMenu) {
-        throw new Error('Menu not found');
+      if (!existingMenu) throw new Error('Menu not found');
+
+      await this.platRepository.remove(existingMenu.plats);
+
+      existingMenu.plats = [];
+
+      for (const platData of updateMenuDto.plats ?? []) {
+        const mealTimeEntities = await this.mealTimeRepository.findBy({
+          id: In(platData.mealTimeIds ?? []),
+        });
+
+        const newPlat = this.platRepository.create({
+          name: platData.name,
+          type: platData.type,
+          image: platData.image?.startsWith('data:image') && platData.image.length > 30
+            ? platData.image
+            : undefined,
+
+          description: platData.description,
+          price: platData.price,
+          mealTimes: mealTimeEntities,
+          menu: existingMenu, // ✅ ici c’est bien un objet `Menu`
+        });
+
+        existingMenu.plats.push(newPlat);
       }
 
-      // Mise à jour des champs du menu
-      if (updateMenuDto.name !== undefined) {
-        existingMenu.name = updateMenuDto.name;
-      }
-
-      if (updateMenuDto.datecreation !== undefined) {
-        existingMenu.datecreation = updateMenuDto.datecreation;
-      }
-
-      // Supprimer les anciens plats
-      await platRepository.delete({ menu: { id } });
-
-      // Créer les nouveaux plats
-      if (updateMenuDto.plats && updateMenuDto.plats.length > 0) {
-        const newPlats = updateMenuDto.plats.map(platData =>
-          platRepository.create({
-            ...platData,
-            menu: existingMenu, // Lien établi ici
-          }),
-        );
-
-        await platRepository.save(newPlats);
-      }
-
-      // Sauvegarde finale du menu
-      await menuRepository.save(existingMenu);
+      await this.menuRepository.save(existingMenu);
 
       await queryRunner.commitTransaction();
 
-      // Retourne le menu à jour avec les relations
       return await this.menuRepository.findOne({
         where: { id },
-        relations: ['plats'],
+        relations: ['plats', 'plats.mealTimes'],
       });
 
     } catch (error) {
       await queryRunner.rollbackTransaction();
       console.error('Erreur dans updateMenu:', error);
       throw error;
-
     } finally {
       await queryRunner.release();
     }
   }
+
 
   async deleteMenu(id: string) {
     const menu = await this.menuRepository.findOne({ where: { id } });

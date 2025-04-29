@@ -34,6 +34,9 @@ import { MealTimeEntity } from './plats/entities/meal-time.entity';
 import { MealTimeService } from './reservations/meal-time/meal-time.service';
 import { MealTimeController } from './reservations/meal-time/meal-time.controller';
 import { MealTimeModule } from './reservations/meal-time/meal-time.module';
+import { CustomerModule } from './customer/customer.module';
+import { CustomerController } from './customer/customer.controller';
+import { CustomerService } from './customer/customer.service';
 
 
 
@@ -67,12 +70,12 @@ import { MealTimeModule } from './reservations/meal-time/meal-time.module';
     ReservationsModule,
     CustomConfigModule,
     BlocModule,
-    // CustomerModule
+    CustomerModule,
     ScheduleModule,
     MealTimeModule
 
   ],
-  controllers: [AppController, ModuleController, BlocController, MealTimeController],
-  providers: [AppService, PlatsService, BlocService, MealTimeService],
+  controllers: [AppController, ModuleController, BlocController, MealTimeController, CustomerController],
+  providers: [AppService, PlatsService, BlocService, MealTimeService, CustomerService],
 })
 export class AppModule { }

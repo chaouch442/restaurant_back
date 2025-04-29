@@ -20,7 +20,8 @@ export class ReservationTable {
   @Column()
   customerName: string;
 
-
+  @Column({ nullable: true })
+  phone: string;
 
   @Column({ default: false })
   isCancelled: boolean;

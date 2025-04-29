@@ -55,6 +55,7 @@ export class TablesService {
     }
 
     const table = this.TableRepository.create({
+      name: dto.name,
       numChaises: dto.numChaises,
       status: dto.status,
       view: dto.view,

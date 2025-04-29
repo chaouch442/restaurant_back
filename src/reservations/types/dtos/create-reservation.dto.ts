@@ -17,7 +17,9 @@ export class CreateReservationDto {
   @IsOptional()
   customerName?: string;
 
-
+  @ApiProperty()
+  @IsString()
+  phone: string;
 
 
   @ApiProperty({ required: false, type: [String] })

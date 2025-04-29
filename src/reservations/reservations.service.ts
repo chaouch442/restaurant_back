@@ -192,7 +192,7 @@ export class ReservationsService {
   // }
 
   async createReservation(createReservationDto: CreateReservationDto, user) {
-    const { tableId, customerName, platIds, reservationTime } = createReservationDto;
+    const { tableId, customerName, phone, platIds, reservationTime } = createReservationDto;
 
     const table = await this.tableRepository.findOneBy({ id: tableId });
     if (!table) throw new NotFoundException('Table not found');
@@ -279,6 +279,7 @@ export class ReservationsService {
     await this.reservationTimeRepository.save(reservationTime);
     const reservation = this.reservationRepository.create({
       customerName,
+      phone,
       table,
       user: connectedUser,
       plats,
