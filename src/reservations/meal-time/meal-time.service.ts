@@ -12,7 +12,14 @@ export class MealTimeService {
         @InjectRepository(Restaurant)
         private readonly restaurantRepository: Repository<Restaurant>
     ) { }
-
+    async countByMealTime(): Promise<{ mealTime: string; count: number }[]> {
+        return this.mealTimeRepository
+            .createQueryBuilder('meal')
+            .select('meal.mealTime', 'mealTime')
+            .addSelect('COUNT(*)', 'count')
+            .groupBy('meal.mealTime')
+            .getRawMany();
+    }
     async findAll(): Promise<MealTimeEntity[]> {
         return this.mealTimeRepository.find();
     }

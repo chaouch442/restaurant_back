@@ -1,6 +1,6 @@
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-
+import { DataSource } from 'typeorm';
 import { RoleRepository } from 'src/auth/repositories/role.repository';
 import { CreateUserDto } from './types/dtos/create.user.dto';
 import * as bcrypt from 'bcrypt';
@@ -23,7 +23,7 @@ export class UserService {
 
     @InjectRepository(ReservationTable)
     private readonly reservationRepository: Repository<ReservationTable>,
-
+    private readonly dataSource: DataSource,
   ) { }
   public generateRandomPassword(length = 8): string {
     const chars = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz!@#$%^&*';
@@ -35,7 +35,10 @@ export class UserService {
     return password;
   }
 
-
+  async countUsers(): Promise<number> {
+    const result = await this.dataSource.query('SELECT COUNT(*)::int AS total Users FROM "user"');
+    return result[0].Total;
+  }
 
   async findByEmail(email: string) {
     console.log('Recherche de l\'utilisateur avec email :', email);
@@ -175,7 +178,6 @@ export class UserService {
     await this.userRepository.delete(id);
     return { message: 'Utilisateur supprimé avec succès.' };
   }
-
 
 }
 

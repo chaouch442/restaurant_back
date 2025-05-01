@@ -22,11 +22,10 @@ import { SystemConfigRepository } from 'src/config/repositories/system-config.re
 import { ReservationTime } from './entities/reservation-time.entity';
 import { ReservationTimeRepository } from './repositories/reservation-time.repository';
 import moment from 'moment';
-
 import { SystemConfigService } from 'src/config/config.service';
 import { MealTimeEntity } from 'src/plats/entities/meal-time.entity';
 import { In, Repository } from 'typeorm';
-
+import * as QRCode from 'qrcode';
 import { CreateMealTimeDto } from 'src/plats/types/dtos/create-meal-time.dto';
 import { MealTime } from './interfaces/mealTime-interface';
 
@@ -59,9 +58,58 @@ export class ReservationsService {
 
     @InjectRepository(MealTimeEntity)
     private readonly mealTimeRepository: Repository<MealTimeEntity>
-
-
   ) { }
+
+
+
+  async getReservationStatsByCustomerConfirmationAndCancellation() {
+    const confirmedByCustomerCount = await this.reservationRepository.count({
+      where: { confirmedByCustomer: true, isCancelled: false },
+    });
+
+    const notConfirmedByCustomerCount = await this.reservationRepository.count({
+      where: { confirmedByCustomer: false, isCancelled: false },
+    });
+
+    const cancelledCount = await this.reservationRepository.count({
+      where: { isCancelled: true },
+    });
+
+    return {
+      confirmedByCustomer: confirmedByCustomerCount,
+      // notConfirmedByCustomer: notConfirmedByCustomerCount,
+      cancelled: cancelledCount,
+    };
+  }
+
+
+  async countCancelled(): Promise<number> {
+    return this.reservationRepository.count({ where: { isCancelled: true } });
+  }
+
+  async countReported(): Promise<number> {
+    return this.reservationRepository
+      .createQueryBuilder('reservation')
+      .where('reservation.reportCount > 0')
+      .getCount();
+  }
+
+
+
+  async getReservationsCountByDate(): Promise<{ date2: string, count: number }[]> {
+    return this.reservationTimeRepository
+      .createQueryBuilder('r')
+      .select('r.date2', 'date2')
+      .addSelect('COUNT(*)', 'count')
+      .groupBy('r.date2')
+      .orderBy('r.date2', 'ASC')
+      .getRawMany();
+  }
+  async countReservations(): Promise<number> {
+    return this.reservationRepository.count();
+  }
+
+
 
   @Cron(CronExpression.EVERY_MINUTE)
   async updateReservationStatus() {
@@ -276,6 +324,7 @@ export class ReservationsService {
     }
 
     await validatePlatsCoherence(platIds, reservationTime.startTime, reservationTime.endTime, plats, this.mealTimeRepository);
+
     await this.reservationTimeRepository.save(reservationTime);
     const reservation = this.reservationRepository.create({
       customerName,
@@ -283,8 +332,19 @@ export class ReservationsService {
       table,
       user: connectedUser,
       plats,
-      reservationTime
+      reservationTime,
+      confirmed: false,
     });
+
+
+    await this.reservationRepository.save(reservation);
+
+
+    const qrData = `Reservation ID: ${reservation.id}`;
+    const qrCodeBase64 = await QRCode.toDataURL(qrData);
+
+
+    reservation.qrCode = qrCodeBase64;
     await this.reservationRepository.save(reservation);
     const reservationTimeWithreservation = {
       ...reservationTime,
@@ -458,6 +518,30 @@ export class ReservationsService {
 
 
 
+  async confirmReservationByQrCode(reservationId: string): Promise<ReservationTable> {
+    const reservation = await this.reservationRepository.findOneBy({ id: reservationId });
+    if (!reservation) {
+      throw new NotFoundException('Reservation not found');
+    }
+
+    reservation.confirmed = true;
+    await this.reservationRepository.save(reservation);
+    return reservation;
+  }
+
+
+  async confirmReservationByCustomer(reservationId: string): Promise<ReservationTable> {
+    const reservation = await this.reservationRepository.findOneBy({ id: reservationId });
+
+    if (!reservation) {
+      throw new NotFoundException('Reservation not found');
+    }
+
+    reservation.confirmedByCustomer = true;
+    await this.reservationRepository.save(reservation);
+
+    return reservation;
+  }
 
 
 

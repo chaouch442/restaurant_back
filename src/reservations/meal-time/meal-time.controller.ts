@@ -5,7 +5,10 @@ import { MealTimeEntity } from 'src/plats/entities/meal-time.entity';
 @Controller('meal-times')
 export class MealTimeController {
     constructor(private readonly mealTimeService: MealTimeService) { }
-
+    @Get('count')
+    async getMealTimeCounts() {
+        return this.mealTimeService.countByMealTime();
+    }
     @Get()
     findAll() {
         return this.mealTimeService.findAll();

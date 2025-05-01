@@ -6,14 +6,23 @@ import { CreateUserDto } from './types/dtos/create.user.dto';
 import { ApiTags } from '@nestjs/swagger';
 import { UpdateUserDto } from './types/dtos/update.user.dto';
 import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
-
+import { DataSource } from 'typeorm';
 
 @ApiTags('users')
 @Controller('user')
 @UseGuards(JwtAuthGuard, RolesGuard)
 export class UserController {
-  constructor(private readonly userService: UserService) { }
+  constructor(private readonly userService: UserService,
+    private readonly dataSource: DataSource
+  ) { }
 
+  @Get('count')
+  @Roles('admin')
+
+  async countUsers(): Promise<number> {
+    const result = await this.dataSource.query('SELECT COUNT(*)::int AS total FROM "user"');
+    return result[0].total;
+  }
   @Post(':userId/assign-role/:roleName')
   @UseGuards(RolesGuard)
   @Roles('admin')
@@ -49,5 +58,8 @@ export class UserController {
     console.log("Tentative de suppression de l'utilisateur avec ID:", id);
     return this.userService.deleteUser(id);
   }
+
+
+
 
 }

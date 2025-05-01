@@ -26,6 +26,12 @@ export class RestaurantService {
 
     ) { }
 
+
+
+  async countRestaurants(): Promise<number> {
+    return this.restaurantRepository.count();
+  }
+
   // async getRestaurantById(id: string) {
   //   const fetchedRestaurant = await this.restaurantRepository.findOne({
   //     where: { id },

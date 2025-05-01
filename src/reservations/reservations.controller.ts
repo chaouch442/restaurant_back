@@ -23,9 +23,41 @@ export class ReservationController {
     @InjectRepository(ReservationTable)
     private readonly reservationRepository,
   ) { }
+  @Get('stats-customer-cancelled')
+  @Roles('admin')
+  async getReservationStatsByCustomerConfirmationAndCancellation() {
+    return await this.reservationService.getReservationStatsByCustomerConfirmationAndCancellation();
+  }
 
+
+  @Get('count-cancelled')
+  @Roles('admin')
+  async getCancelledCount(): Promise<number> {
+    return this.reservationService.countCancelled();
+  }
+
+  @Get('count-reported')
+  @Roles('admin')
+  async getReportedCount(): Promise<number> {
+    return this.reservationService.countReported();
+  }
+
+
+  @Get('count-by-date')
+  @Roles('admin')
+  async getReservationsCountByDate() {
+    return this.reservationService.getReservationsCountByDate();
+  }
+
+  @Get('count')
+  @Roles('admin')
+
+  async getReservationCount(): Promise<{ totalReservations: number }> {
+    const totalReservations = await this.reservationService.countReservations();
+    return { totalReservations };
+  }
   @Post()
-  @Roles('admin', 'costumer')
+  @Roles('admin', 'customer', 'serveur')
   async createReservation(
     @Body() createReservationDto: CreateReservationDto,
     @userId() user: User,
@@ -36,48 +68,42 @@ export class ReservationController {
   }
 
   @Get(':id')
-  @Roles('admin', 'customer')
+  @Roles('admin', 'customer', 'serveur')
   async getReservationById(@Param('id', ParseUUIDPipe) id: string) {
     console.log("ID reçu :", id);
     return this.reservationService.getReservationById(id);
   }
   @Get()
-  @Roles('admin', 'customer')
+  @Roles('admin', 'customer', 'serveur')
   async getReservation() {
     return this.reservationService.getReservation();
   }
   @Patch(':id')
-  @Roles('admin', 'customer')
+  @Roles('admin', 'customer', 'serveur')
 
   async updateReservation(@Param('id') id: string, @Body() updatereservationDto: UpdateReservationDto, @userId() user: any,) {
     console.log('updateReservationDto:', updatereservationDto);
     return this.reservationService.updateReservation(id, updatereservationDto, user);
   }
   @Delete(':id')
-  @Roles('admin', 'customer')
+  @Roles('admin', 'customer', 'serveur')
   async deleteReservation(@Param('id', ParseUUIDPipe) id: string, @userId() user: User,) {
     return this.reservationService.deleteReservation(id, user);
   }
 
 
-  @Get('verify/:id')
-  async verifyReservation(@Param('id') id: string) {
-    const reservation = await this.reservationRepository.findOneBy({ id });
 
-    if (!reservation) {
-      throw new NotFoundException('Réservation non trouvée');
-    }
 
-    return {
-      message: 'Réservation valide',
-      customerName: reservation.customerName,
-      reservationDateTime: reservation.reservationDateTime,
-      table: reservation.table,
-      restaurant: reservation.restaurant,
-    };
+  @Get('confirm/:reservationId')
+  @Roles('admin', 'customer', 'serveur')
+  async confirmReservation(@Param('reservationId') reservationId: string): Promise<ReservationTable> {
+    return await this.reservationService.confirmReservationByQrCode(reservationId);
   }
 
-
-
+  @Get('confirm-by-customer/:reservationId')
+  @Roles('admin', 'customer', 'serveur')
+  async confirmByCustomer(@Param('reservationId') reservationId: string) {
+    return this.reservationService.confirmReservationByCustomer(reservationId);
+  }
 
 }

@@ -21,7 +21,9 @@ export class TablesService {
     @InjectRepository(ReservationTable)
     private readonly reservationRepository: ReservationRepository,) { }
 
-
+  async countTables(): Promise<number> {
+    return this.TableRepository.count();
+  }
   async createTable(dto: CreateTableDto): Promise<TableRestaurant> {
     const bloc = await this.restaurantBlocRepository.findOne({
       where: { id: dto.restaurantBlocId },

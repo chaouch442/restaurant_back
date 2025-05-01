@@ -19,7 +19,12 @@ import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
 export class RestaurantController {
   constructor(private readonly restaurantService: RestaurantService) { }
 
-
+  @Get('count')
+  @Roles('admin')
+  async getRestaurantCount(): Promise<{ totalRestaurants: number }> {
+    const totalRestaurants = await this.restaurantService.countRestaurants();
+    return { totalRestaurants };
+  }
   @Get('restaurant')
   @ApiQuery({ name: 'search', required: false })
   @ApiQuery({ name: 'isActive', required: false })

@@ -18,6 +18,12 @@ export class TablesController {
   constructor(private readonly tableService: TablesService) { }
 
   @Roles('admin')
+  @Get('count')
+  async getTableCount(): Promise<{ totalTables: number }> {
+    const totalTables = await this.tableService.countTables();
+    return { totalTables };
+  }
+  @Roles('admin')
   @Post()
   createTable(@Body() createTableDto: CreateTableDto) {
     return this.tableService.createTable(createTableDto);

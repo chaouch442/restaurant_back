@@ -49,6 +49,16 @@ export class ReservationTable {
   @Column({ default: 0 })
   reportCount: number;
 
+  @Column({ default: false })
+  confirmed: boolean;
+
+  @Column({ default: false })
+  confirmedByCustomer: boolean;
+
+  @Column({ type: 'text', nullable: true })
+  qrCode: string;
+
+
   @OneToOne(() => ReservationTime, { eager: true, nullable: true })
   @JoinColumn()
   reservationTime?: ReservationTime;
