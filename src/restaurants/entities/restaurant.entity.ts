@@ -5,6 +5,7 @@ import { RestaurantImage } from 'src/image/image.entity';
 import { RestaurantBloc } from './Restaurant-Bloc.entity';
 import { MenuRestaurant } from 'src/menu/entities/menu.entity';
 import { Exclude } from 'class-transformer';
+import { MealTimeEntity } from 'src/plats/entities/meal-time.entity';
 @Entity()
 export class Restaurant implements IRestaurant {
   @PrimaryGeneratedColumn('uuid')
@@ -54,6 +55,11 @@ export class Restaurant implements IRestaurant {
   @OneToMany(() => MenuRestaurant, (menuRestaurant) => menuRestaurant.restaurant)
   @Exclude()
   menuRestaurant: MenuRestaurant
+
+
+  @OneToMany(() => MealTimeEntity, mealTime => mealTime.restaurant)
+  mealTimes: MealTimeEntity[];
+
 
   @CreateDateColumn()
   createdAt: Date;

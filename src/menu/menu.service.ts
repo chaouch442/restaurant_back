@@ -151,7 +151,7 @@ export class MenuService {
           description: platData.description,
           price: platData.price,
           mealTimes: mealTimeEntities,
-          menu: existingMenu, // ✅ ici c’est bien un objet `Menu`
+          menu: existingMenu,
         });
 
         existingMenu.plats.push(newPlat);
