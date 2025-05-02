@@ -23,36 +23,35 @@ export class MenuController {
     }
     return this.menuService.createMenu(createMenuDto);
   }
-
-  @Roles('admin')
+  @Roles('manager', 'Customer', 'serveur')
   @Get()
   async getMenu() {
     return this.menuService.getMenu();
   }
 
-  @Roles('admin')
+  @Roles('manager', 'Customer', 'serveur')
   @Get(':id')
   async getMenuById(@Param('id', ParseUUIDPipe) id: string) {
     return this.menuService.getMenuById(id);
   }
-  @Roles('admin')
+  @Roles('manager')
   @Patch(':id')
   async updateMenu(@Param('id') id: string, @Body() updateMenuDto: UpdateMenuDto) {
     return this.menuService.updateMenu(id, updateMenuDto);
   }
-  @Roles('admin')
+  @Roles('manager')
   @Delete(':id')
   async deleteMenu(@Param('id', ParseUUIDPipe) id: string) {
     return this.menuService.deleteMenu(id);
   }
 
-  @Roles('admin')
+  @Roles('manager', 'Customer', 'serveur')
   @Get('/mealTime/:mealTime')
   async getMenuByMealTime(@Param('mealTime') mealTime: MealTime) {
     return this.menuService.getMenuByMealTime(mealTime);
   }
 
-  @Roles('admin')
+  @Roles('manager', 'Customer', 'serveur')
   @Get('by-restaurant/:id')
   getMenusByRestaurant(@Param('id') restaurantId: string) {
     return this.menuService.findMenusByRestaurantId(restaurantId);

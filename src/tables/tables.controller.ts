@@ -10,6 +10,7 @@ import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
 
 
 
+
 @UseGuards(JwtAuthGuard, RolesGuard)
 @ApiBearerAuth('access-token')
 @ApiTags('tables')
@@ -23,34 +24,34 @@ export class TablesController {
     const totalTables = await this.tableService.countTables();
     return { totalTables };
   }
-  @Roles('admin')
+  @Roles('manager')
   @Post()
   createTable(@Body() createTableDto: CreateTableDto) {
     return this.tableService.createTable(createTableDto);
   }
-
+  @Roles('manager', 'Customer')
   @Get()
   async getTable() {
     return this.tableService.getTable();
   }
-
+  @Roles('manager', 'Customer')
   @Get(':id')
   async getTableById(@Param('id', ParseUUIDPipe) id: string) {
     return this.tableService.getTableById(id);
   }
 
-  @Roles('admin')
+  @Roles('manager')
   @Patch(':id')
   async updateTable(@Param('id') id: string, @Body() UpdateTableDto: UpdateTableDto) {
     return this.tableService.updateTable(id, UpdateTableDto);
   }
-  @Roles('admin')
+  @Roles('manager')
   @Delete(':id')
   async deleteTable(@Param('id') id: string) {
     return this.tableService.delete(id);
   }
 
-  @Roles('admin')
+  @Roles('manager')
   @Patch(':id/status')
   async updateTableStatus(
     @Param('id') id: string,

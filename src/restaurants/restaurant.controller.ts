@@ -26,6 +26,7 @@ export class RestaurantController {
     return { totalRestaurants };
   }
   @Get('restaurant')
+  @Roles('admin', 'manager', 'customer')
   @ApiQuery({ name: 'search', required: false })
   @ApiQuery({ name: 'isActive', required: false })
   @ApiQuery({ name: 'categorie', required: false })
@@ -38,6 +39,7 @@ export class RestaurantController {
   }
 
   @Get(':id')
+  @Roles('admin', 'manager', 'customer')
   async getRestaurantById(@Param('id', ParseUUIDPipe) id: string) {
     console.log("ID reçu :", id);
     return this.restaurantService.getRestaurantById(id);

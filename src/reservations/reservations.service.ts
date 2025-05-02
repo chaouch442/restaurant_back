@@ -136,8 +136,8 @@ export class ReservationsService {
       reservation.status = ReservationStatus.FINISHED;
       await this.reservationRepository.save(reservation);
 
-      await this.reservationRepository.delete(reservation.id);
-      console.log(`Reservation ${reservation.id} terminée et supprimée.`);
+      // await this.reservationRepository.delete(reservation.id);
+      // console.log(`Reservation ${reservation.id} terminée et supprimée.`);
 
 
     }

@@ -14,7 +14,7 @@ import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
 @Roles('admin')
 export class BlocController {
   constructor(private readonly blocService: BlocService) { }
-
+  @Roles('admin', 'manager')
   @Post()
 
   create(@Body() createDto: CreateBlocDto) {
