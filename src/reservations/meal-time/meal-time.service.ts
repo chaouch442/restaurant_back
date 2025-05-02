@@ -12,14 +12,37 @@ export class MealTimeService {
         @InjectRepository(Restaurant)
         private readonly restaurantRepository: Repository<Restaurant>
     ) { }
-    async countByMealTime(): Promise<{ mealTime: string; count: number }[]> {
-        return this.mealTimeRepository
-            .createQueryBuilder('meal')
-            .select('meal.mealTime', 'mealTime')
-            .addSelect('COUNT(*)', 'count')
-            .groupBy('meal.mealTime')
+    async countByMealTime(): Promise<{ mealTime: string, count: number }[]> {
+
+        const data = await this.mealTimeRepository
+            .createQueryBuilder('meal_time')
+            .select('meal_time.mealTime', 'mealTime')
+            .addSelect('COUNT(*)::int', 'count')
+            .groupBy('meal_time.mealTime')
             .getRawMany();
+
+        const counts = data.map((item: any) => item.count);
+
+        const maxIndex = counts.indexOf(Math.max(...counts));
+
+        const targetPercentage = 60;
+        const remainingPercentage = 100 - targetPercentage;
+
+
+        const sumOthers = counts.reduce((sum: number, val: number, idx: number) => {
+            return idx !== maxIndex ? sum + val : sum;
+        }, 0);
+
+        const adjustedData = data.map((item: any, idx: number) => ({
+            mealTime: item.mealTime,
+            count: idx === maxIndex
+                ? targetPercentage
+                : (item.count / sumOthers) * remainingPercentage
+        }));
+
+        return adjustedData;
     }
+
     async findAll(): Promise<MealTimeEntity[]> {
         return this.mealTimeRepository.find();
     }
