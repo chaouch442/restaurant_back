@@ -47,13 +47,13 @@ export class UserController {
   }
 
   @Patch(':id')
-  @Roles('admin')
+  @Roles('admin', 'customer', 'serveur', 'manager')
   async updateUser(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto) {
     return this.userService.updateUser(id, updateUserDto);
   }
 
   @Delete(':id')
-  @Roles('admin')
+  @Roles('admin', 'customer', 'serveur', 'manager')
   async deleteUser(@Param('id', ParseIntPipe) id: string) {
     console.log("Tentative de suppression de l'utilisateur avec ID:", id);
     return this.userService.deleteUser(id);

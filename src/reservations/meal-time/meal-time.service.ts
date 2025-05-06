@@ -90,6 +90,11 @@ export class MealTimeService {
 
         return { deleted: true };
     }
-
+    async getMealTimesByRestaurant(restaurantId: string) {
+        return this.mealTimeRepository.find({
+            where: { restaurant: { id: restaurantId } },
+            relations: ['restaurant'],
+        });
+    }
 
 }

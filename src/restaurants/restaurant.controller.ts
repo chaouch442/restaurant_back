@@ -6,6 +6,8 @@ import { Roles } from 'src/auth/decorators/roles.decorator';
 import { RolesGuard } from 'src/auth/guards/roles.guard';
 import { UpdateRestaurantDto } from './types/dto/update-restaurant.dto';
 import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
+import { MealTimeService } from 'src/reservations/meal-time/meal-time.service';
+
 
 
 
@@ -17,7 +19,9 @@ import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
 @ApiTags('restaurants')
 @Controller('restaurant')
 export class RestaurantController {
-  constructor(private readonly restaurantService: RestaurantService) { }
+  constructor(private readonly restaurantService: RestaurantService,
+    private readonly mealTimeService: MealTimeService
+  ) { }
 
   @Get('count')
   @Roles('admin')
@@ -26,7 +30,7 @@ export class RestaurantController {
     return { totalRestaurants };
   }
   @Get('restaurant')
-  @Roles('admin', 'manager', 'customer')
+  @Roles('admin', 'manager', 'customer', 'serveur')
   @ApiQuery({ name: 'search', required: false })
   @ApiQuery({ name: 'isActive', required: false })
   @ApiQuery({ name: 'categorie', required: false })
@@ -39,7 +43,7 @@ export class RestaurantController {
   }
 
   @Get(':id')
-  @Roles('admin', 'manager', 'customer')
+  @Roles('admin', 'manager', 'customer', 'serveur')
   async getRestaurantById(@Param('id', ParseUUIDPipe) id: string) {
     console.log("ID reçu :", id);
     return this.restaurantService.getRestaurantById(id);
@@ -78,6 +82,12 @@ export class RestaurantController {
   getRestaurantWithMenus(@Param('id') id: string) {
     return this.restaurantService.getRestaurantWithMenus(id);
   }
+  @Roles('manager')
+  @Get(':id/meal-times')
+  async getMealTimesByRestaurant(@Param('id') id: string) {
+    return this.mealTimeService.getMealTimesByRestaurant(id);
+  }
+
 
 
 }

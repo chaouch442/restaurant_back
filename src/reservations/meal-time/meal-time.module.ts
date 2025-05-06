@@ -10,5 +10,6 @@ import { Restaurant } from 'src/restaurants/entities/restaurant.entity';
     imports: [TypeOrmModule.forFeature([MealTimeEntity, Restaurant])],
     controllers: [MealTimeController],
     providers: [MealTimeService],
+    exports: [MealTimeService],
 })
 export class MealTimeModule { }

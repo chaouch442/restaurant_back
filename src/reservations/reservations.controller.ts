@@ -57,7 +57,7 @@ export class ReservationController {
     return { totalReservations };
   }
   @Post()
-  @Roles('admin', 'customer', 'serveur')
+  @Roles('admin', 'customer', 'serveur', 'manager')
   async createReservation(
     @Body() createReservationDto: CreateReservationDto,
     @userId() user: User,
@@ -68,25 +68,25 @@ export class ReservationController {
   }
 
   @Get(':id')
-  @Roles('admin', 'customer', 'serveur')
+  @Roles('admin', 'customer', 'serveur', 'manager')
   async getReservationById(@Param('id', ParseUUIDPipe) id: string) {
     console.log("ID reçu :", id);
     return this.reservationService.getReservationById(id);
   }
   @Get()
-  @Roles('admin', 'customer', 'serveur')
+  @Roles('admin', 'customer', 'serveur', 'manager')
   async getReservation() {
     return this.reservationService.getReservation();
   }
   @Patch(':id')
-  @Roles('admin', 'customer', 'serveur')
+  @Roles('admin', 'customer', 'serveur', 'manager')
 
   async updateReservation(@Param('id') id: string, @Body() updatereservationDto: UpdateReservationDto, @userId() user: any,) {
     console.log('updateReservationDto:', updatereservationDto);
     return this.reservationService.updateReservation(id, updatereservationDto, user);
   }
   @Delete(':id')
-  @Roles('admin', 'customer', 'serveur')
+  @Roles('admin', 'customer', 'serveur', 'manager')
   async deleteReservation(@Param('id', ParseUUIDPipe) id: string, @userId() user: User,) {
     return this.reservationService.deleteReservation(id, user);
   }

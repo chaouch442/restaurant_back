@@ -10,6 +10,7 @@ import { Bloc } from 'src/bloc/entities/bloc.entity';
 import { instanceToPlain, plainToInstance } from 'class-transformer';
 import { RestaurantImage } from 'src/image/image.entity';
 import { Restaurant } from './entities/restaurant.entity';
+import { MealTimeEntity } from 'src/plats/entities/meal-time.entity';
 @Injectable()
 export class RestaurantService {
 
@@ -23,6 +24,8 @@ export class RestaurantService {
 
       @InjectRepository(RestaurantImage)
       private restaurantImageRepository: Repository<RestaurantImage>,
+      @InjectRepository(MealTimeEntity)
+      private readonly mealTimeRepository: Repository<MealTimeEntity>,
 
     ) { }
 

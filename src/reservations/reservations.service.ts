@@ -505,7 +505,10 @@ export class ReservationsService {
     );
 
     const isCancellable =
-      reservation.status === ReservationStatus.CANCELLED || fullEndDateTime < now;
+      reservation.status === ReservationStatus.CANCELLED ||
+      reservation.status === ReservationStatus.FINISHED ||
+      fullEndDateTime < now;
+
 
     if (!isCancellable) {
       throw new BadRequestException("Seules les réservations annulées ou passées peuvent être supprimées");
