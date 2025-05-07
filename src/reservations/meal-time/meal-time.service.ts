@@ -91,10 +91,19 @@ export class MealTimeService {
         return { deleted: true };
     }
     async getMealTimesByRestaurant(restaurantId: string) {
-        return this.mealTimeRepository.find({
+        const mealTimes = await this.mealTimeRepository.find({
             where: { restaurant: { id: restaurantId } },
             relations: ['restaurant'],
         });
+
+        return mealTimes.map(mt => ({
+            id: mt.id,
+            mealTime: mt.mealTime,
+            startTime: mt.startTime,
+            endTime: mt.endTime,
+            restaurantId: mt.restaurant.id,
+        }));
     }
+
 
 }

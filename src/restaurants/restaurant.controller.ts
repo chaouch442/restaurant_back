@@ -82,7 +82,7 @@ export class RestaurantController {
   getRestaurantWithMenus(@Param('id') id: string) {
     return this.restaurantService.getRestaurantWithMenus(id);
   }
-  @Roles('manager')
+  @Roles('manager', 'admin')
   @Get(':id/meal-times')
   async getMealTimesByRestaurant(@Param('id') id: string) {
     return this.mealTimeService.getMealTimesByRestaurant(id);
