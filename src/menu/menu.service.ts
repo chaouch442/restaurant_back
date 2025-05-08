@@ -215,7 +215,7 @@ export class MenuService {
           id: restaurantId,
         },
       },
-      relations: ['restaurant', 'plats'],
+      relations: ['restaurant', 'plats', 'plats.mealTimes'],
     });
   }
 }
