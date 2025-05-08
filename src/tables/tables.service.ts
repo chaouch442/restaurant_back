@@ -9,6 +9,7 @@ import { RestaurantBloc } from 'src/restaurants/entities/Restaurant-Bloc.entity'
 import { TableStatus } from './enums/status.enums';
 import { ReservationTable } from 'src/reservations/entities/reservation.entity';
 import { ReservationRepository } from 'src/reservations/repositories/reservation.repository';
+import { Not } from 'typeorm';
 
 
 @Injectable()
@@ -99,7 +100,29 @@ export class TablesService {
 
     return table;
   }
+  // async updateTable(id: string, updateTableDto: UpdateTableDto) {
+  //   const table = await this.TableRepository.findOne({
+  //     where: { id },
+  //     relations: ['reservations'],
+  //   });
+
+  //   if (!table) {
+  //     throw new NotFoundException(`Table with ID ${id} not found`);
+  //   }
+
+  //   const hasReservations = table.reservations?.length > 0;
+
+  //   if (hasReservations) {
+  //     throw new BadRequestException(
+  //       'Impossible de modifier cette table car elle est déjà réservée.'
+  //     );
+  //   }
+
+  //   Object.assign(table, updateTableDto);
+  //   return await this.TableRepository.save(table);
+  // }
   async updateTable(id: string, updateTableDto: UpdateTableDto) {
+    // 🔍 1️⃣ Récupérer la table existante avec ses réservations
     const table = await this.TableRepository.findOne({
       where: { id },
       relations: ['reservations'],
@@ -109,15 +132,33 @@ export class TablesService {
       throw new NotFoundException(`Table with ID ${id} not found`);
     }
 
-    const hasReservations = table.reservations?.length > 0;
 
+    const hasReservations = table.reservations?.length > 0;
     if (hasReservations) {
+      throw new BadRequestException('Impossible de modifier cette table car elle est déjà réservée.');
+    }
+
+
+    const otherTable = await this.TableRepository.findOne({
+      where: {
+        restaurantBloc: { id: updateTableDto.restaurantBlocId ?? table.restaurantBloc.id },
+        row: updateTableDto.row,
+        col: updateTableDto.col,
+        id: Not(id),
+      },
+    });
+
+
+    if (otherTable) {
       throw new BadRequestException(
-        'Impossible de modifier cette table car elle est déjà réservée.'
+        `La position (${updateTableDto.row}, ${updateTableDto.col}) est déjà occupée par une autre table.`
       );
     }
 
+
     Object.assign(table, updateTableDto);
+
+
     return await this.TableRepository.save(table);
   }
 

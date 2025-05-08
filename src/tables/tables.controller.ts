@@ -24,34 +24,34 @@ export class TablesController {
     const totalTables = await this.tableService.countTables();
     return { totalTables };
   }
-  @Roles('manager')
+  @Roles('manager', 'admin')
   @Post()
   createTable(@Body() createTableDto: CreateTableDto) {
     return this.tableService.createTable(createTableDto);
   }
-  @Roles('manager', 'Customer')
+  @Roles('manager', 'Customer', 'admin')
   @Get()
   async getTable() {
     return this.tableService.getTable();
   }
-  @Roles('manager', 'Customer')
+  @Roles('manager', 'Customer', 'admin')
   @Get(':id')
   async getTableById(@Param('id', ParseUUIDPipe) id: string) {
     return this.tableService.getTableById(id);
   }
 
-  @Roles('manager')
+  @Roles('manager', 'admin')
   @Patch(':id')
   async updateTable(@Param('id') id: string, @Body() UpdateTableDto: UpdateTableDto) {
     return this.tableService.updateTable(id, UpdateTableDto);
   }
-  @Roles('manager')
+  @Roles('manager', 'admin')
   @Delete(':id')
   async deleteTable(@Param('id') id: string) {
     return this.tableService.delete(id);
   }
 
-  @Roles('manager')
+  @Roles('manager', 'admin')
   @Patch(':id/status')
   async updateTableStatus(
     @Param('id') id: string,
