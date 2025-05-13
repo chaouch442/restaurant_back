@@ -1,10 +1,10 @@
 import { IsEmail, IsNotEmpty, MinLength, Matches, IsEnum, IsString, } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 import { Match } from './match.decorator';
-export enum UserRole {
-  ADMIN = 'admin',
-  CUSTOMER = 'customer',
-}
+// export enum UserRole {
+//   ADMIN = 'admin',
+//   CUSTOMER = 'customer',
+// }
 
 export class SignupDto {
   @ApiProperty({ example: 'user@example.com' })
@@ -29,13 +29,16 @@ export class SignupDto {
   @IsNotEmpty()
   name: string;
 
+  @ApiProperty()
+  @IsNotEmpty()
+  lastname: string;
 
   @ApiProperty()
   @IsString()
   phone?: string;
 
-  @ApiProperty()
-  @IsNotEmpty()
-  @IsEnum(UserRole, { message: `Role must be one of: ${Object.values(UserRole).join(', ')}` })
-  role: UserRole;
+  // @ApiProperty()
+  // @IsNotEmpty()
+  // @IsEnum(UserRole, { message: `Role must be one of: ${Object.values(UserRole).join(', ')}` })
+  // role: UserRole;
 }

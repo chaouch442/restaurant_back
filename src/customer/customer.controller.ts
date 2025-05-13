@@ -7,14 +7,15 @@ import { ApiTags } from '@nestjs/swagger';
 @Controller('customer')
 export class CustomerController {
     constructor(private readonly customerService: CustomerService) { }
+
     @Get('check-availability')
     async checkAvailability(
         @Query('tableId') tableId: string,
         @Query('date') date: string,
         @Query('startTime') startTime: string,
-        @Query('endTime') endTime: string,
     ) {
-        return this.customerService.checkAvailability(tableId, date, startTime, endTime);
+        return this.customerService.checkAvailability(tableId, date, startTime);
     }
+
 
 }

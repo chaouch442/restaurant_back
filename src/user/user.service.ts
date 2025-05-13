@@ -1,4 +1,4 @@
-import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { DataSource } from 'typeorm';
 import { RoleRepository } from 'src/auth/repositories/role.repository';
@@ -120,32 +120,83 @@ export class UserService {
     if (!user) {
       throw new NotFoundException('Utilisateur non trouvé.');
     }
-
+    console.log("🚀 Utilisateur renvoyé :", user);
     return user;
   }
 
   async getUser() {
     return this.userRepository.find();
   }
-  async updateUser(id: string, updateUserDto: UpdateUserDto) {
+  // async updateUser(id: string, updateUserDto: UpdateUserDto) {
+  //   const user = await this.userRepository.findOneBy({ id });
+
+  //   if (!user) {
+  //     throw new NotFoundException(`User with ID ${id} not found`);
+  //   }
+  //   const role = await this.roleRepository.findOneBy({ name: updateUserDto.role });
+  //   if (!role) {
+  //     throw new NotFoundException(`Role ${updateUserDto.role} non trouvé`);
+  //   }
+
+  //   if (updateUserDto.role && !['manager', 'serveur'].includes(updateUserDto.role)) {
+  //     throw new BadRequestException("Seuls les rôles 'manager' et 'serveur' peuvent être assignés.");
+  //   }
+
+  //   Object.assign(user, updateUserDto);
+  //   user.role = role;
+  //   return await this.userRepository.save(user);
+  // }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  async updateUser(id: string, updateUserDto: UpdateUserDto, request: any) {
     const user = await this.userRepository.findOneBy({ id });
 
     if (!user) {
       throw new NotFoundException(`User with ID ${id} not found`);
     }
-    const role = await this.roleRepository.findOneBy({ name: updateUserDto.role });
-    if (!role) {
-      throw new NotFoundException(`Role ${updateUserDto.role} non trouvé`);
+
+    const currentUser = request.user; // JWT payload (à condition d’utiliser un décorateur @Req())
+
+    // Si le rôle est en train d'être modifié
+    if (updateUserDto.role && updateUserDto.role !== user.role.name) {
+      // Seul un admin a le droit de modifier le rôle
+      if (currentUser.role !== 'admin') {
+        throw new ForbiddenException("Seul un administrateur peut modifier le rôle d'un utilisateur.");
+      }
+
+      // Validation du rôle
+      if (!['manager', 'serveur'].includes(updateUserDto.role)) {
+        throw new BadRequestException("Seuls les rôles 'manager' et 'serveur' peuvent être assignés.");
+      }
+
+      const newRole = await this.roleRepository.findOneBy({ name: updateUserDto.role });
+      if (!newRole) {
+        throw new NotFoundException(`Role ${updateUserDto.role} non trouvé`);
+      }
+
+      user.role = newRole;
     }
 
-    if (updateUserDto.role && !['manager', 'serveur'].includes(updateUserDto.role)) {
-      throw new BadRequestException("Seuls les rôles 'manager' et 'serveur' peuvent être assignés.");
-    }
-
+    // Met à jour les autres champs (name, email, etc.)
+    delete updateUserDto.role; // pour ne pas écraser accidentellement le rôle si non modifié
     Object.assign(user, updateUserDto);
-    user.role = role;
+
     return await this.userRepository.save(user);
   }
+
 
   async deleteUser(id: string) {
     console.log("ID reçu pour suppression:", id);

@@ -1,4 +1,4 @@
-import { Controller, Post, Param, UseGuards, Body, Get, Put, Delete, ParseUUIDPipe, Patch, ParseIntPipe } from '@nestjs/common';
+import { Controller, Post, Param, UseGuards, Body, Get, Put, Delete, ParseUUIDPipe, Patch, ParseIntPipe, Req } from '@nestjs/common';
 import { UserService } from './user.service';
 import { Roles } from 'src/auth/decorators/roles.decorator';
 import { RolesGuard } from 'src/auth/guards/roles.guard';
@@ -36,7 +36,7 @@ export class UserController {
   }
 
   @Get(':id')
-  @Roles('admin')
+  @Roles('admin', 'customer', 'serveur', 'manager')
   async getUserById(@Param('id') id: string) {
     return this.userService.getUserById(id);
   }
@@ -48,8 +48,8 @@ export class UserController {
 
   @Patch(':id')
   @Roles('admin', 'customer', 'serveur', 'manager')
-  async updateUser(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto) {
-    return this.userService.updateUser(id, updateUserDto);
+  async updateUser(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto, @Req() request: any) {
+    return this.userService.updateUser(id, updateUserDto, request);
   }
 
   @Delete(':id')

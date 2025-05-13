@@ -122,7 +122,6 @@ export class TablesService {
   //   return await this.TableRepository.save(table);
   // }
   async updateTable(id: string, updateTableDto: UpdateTableDto) {
-    // 🔍 1️⃣ Récupérer la table existante avec ses réservations
     const table = await this.TableRepository.findOne({
       where: { id },
       relations: ['reservations'],
@@ -132,13 +131,28 @@ export class TablesService {
       throw new NotFoundException(`Table with ID ${id} not found`);
     }
 
+    // ✅ Vérifier s’il y a une réservation future
+    const now = new Date();
 
-    const hasReservations = table.reservations?.length > 0;
-    if (hasReservations) {
-      throw new BadRequestException('Impossible de modifier cette table car elle est déjà réservée.');
+    const hasFutureReservation = table.reservations?.some(res => {
+      const time = res.reservationTime;
+
+      if (!time?.date2 || !time?.startTime) return false;
+
+      const dateStr = new Date(time.date2).toISOString().split('T')[0];
+      const fullDateTimeStr = `${dateStr}T${time.startTime}`;
+      const reservationDate = new Date(fullDateTimeStr);
+
+      return reservationDate > now;
+    });
+
+    if (hasFutureReservation) {
+      throw new BadRequestException(
+        "Impossible de modifier cette table car elle est déjà réservée à une date future."
+      );
     }
 
-
+    // Vérifier la position
     const otherTable = await this.TableRepository.findOne({
       where: {
         restaurantBloc: { id: updateTableDto.restaurantBlocId ?? table.restaurantBloc.id },
@@ -148,17 +162,13 @@ export class TablesService {
       },
     });
 
-
     if (otherTable) {
       throw new BadRequestException(
         `La position (${updateTableDto.row}, ${updateTableDto.col}) est déjà occupée par une autre table.`
       );
     }
 
-
     Object.assign(table, updateTableDto);
-
-
     return await this.TableRepository.save(table);
   }
 

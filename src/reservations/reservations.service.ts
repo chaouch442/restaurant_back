@@ -281,6 +281,27 @@ export class ReservationsService {
     // if (overlappingReservations > 0) {
     //   throw new BadRequestException('La table est déjà réservée dans ce créneau horaire.');
     // }
+    const startMoment = moment(reservationTime.startTime, 'HH:mm');
+    const mealTimes = await this.mealTimeRepository.find();
+
+    const matchedMealTime = mealTimes.find(mt => {
+      const mtStart = moment(mt.startTime, 'HH:mm');
+      const mtEnd = moment(mt.endTime, 'HH:mm');
+
+      // Gère les repas qui passent à minuit (ex: 18:00 → 00:00)
+      if (mtEnd.isBefore(mtStart)) {
+        return startMoment.isSameOrAfter(mtStart) || startMoment.isBefore(mtEnd);
+      } else {
+        return startMoment.isSameOrAfter(mtStart) && startMoment.isBefore(mtEnd);
+      }
+    });
+
+    if (!matchedMealTime) {
+      throw new BadRequestException(`Aucun créneau de repas ne correspond à l'heure de début : ${reservationTime.startTime}`);
+    }
+
+    // 🔁 Affecter automatiquement l'heure de fin selon MealTime
+    reservationTime.endTime = matchedMealTime.endTime;
 
 
     const existingReservation = await this.reservationRepository
@@ -306,7 +327,7 @@ export class ReservationsService {
     const debutDateTime = moment(`${reservationTime.date2}T${reservationTime.startTime}`);
     const finDateTime = moment(`${reservationTime.date2}T${reservationTime.endTime}`);
     validateReservationTime(debutDateTime, finDateTime, config.maxCancelTimeBeforeReservation);
-    const startMoment = moment(reservationTime.startTime, 'HH:mm');
+    // const startMoment = moment(reservationTime.startTime, 'HH:mm');
     const endMoment = moment(reservationTime.endTime, 'HH:mm');
 
     const reservationMealTime = getMealTimeForRange(startMoment, endMoment);

@@ -5,7 +5,7 @@ import {
 import {
   IsString,
   IsOptional,
-  IsUUID,
+
   IsBoolean,
 } from 'class-validator';
 
@@ -22,6 +22,7 @@ export class CreateReservationTimeDto {
   @IsString()
   startTime: string;
 
+  @IsOptional()
   @ApiProperty({
     example: '13:30',
     description: 'End time of the reservation slot (HH:mm)',
