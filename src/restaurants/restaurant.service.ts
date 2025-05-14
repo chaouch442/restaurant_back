@@ -236,7 +236,6 @@ export class RestaurantService {
     await this.restaurantRepository.delete(id);
     return { message: `Restaurant with ID ${id} deleted successfully` };
   }
-
   async updateRestaurant(id: string, updateRestaurantDto: UpdateRestaurantDto) {
     if (!Object.keys(updateRestaurantDto).length) {
       throw new BadRequestException("Aucune donnée à mettre à jour.");
@@ -244,7 +243,7 @@ export class RestaurantService {
 
     const restaurant = await this.restaurantRepository.findOne({
       where: { id },
-      relations: ['restaurantBlocs'],
+      relations: ['restaurantBlocs', 'restaurantBlocs.bloc'],
     });
 
     if (!restaurant) {
@@ -253,21 +252,36 @@ export class RestaurantService {
 
     if (updateRestaurantDto.restaurantBlocs && updateRestaurantDto.restaurantBlocs.length > 0) {
       const blocsDto: RestaurantBloc[] = updateRestaurantDto.restaurantBlocs.map((blocDto) => {
+
+
         const blocEntity = new RestaurantBloc();
-
         blocEntity.bloc = { id: blocDto.blocId } as Bloc;
-
-
         blocEntity.maxTables = blocDto.maxTables;
-
         blocEntity.maxChaises = blocDto.maxChaises;
 
-
         blocEntity.restaurant = restaurant;
-
-
         blocEntity.tables = [];
 
+        if ((blocDto as any).id) {
+          blocEntity.id = (blocDto as any).id;
+        }
+
+        return blocEntity;
+      });
+      console.log(blocsDto.map(b => b.restaurant?.id)); // ✅ yelzem kol wa7ed fih id
+      restaurant.restaurantBlocs = blocsDto;
+
+    }
+
+    Object.assign(restaurant, updateRestaurantDto); // d'abord
+    if (updateRestaurantDto.restaurantBlocs && updateRestaurantDto.restaurantBlocs.length > 0) {
+      const blocsDto = updateRestaurantDto.restaurantBlocs.map((blocDto) => {
+        const blocEntity = new RestaurantBloc();
+        blocEntity.bloc = { id: blocDto.blocId } as Bloc;
+        blocEntity.maxTables = blocDto.maxTables;
+        blocEntity.maxChaises = blocDto.maxChaises;
+        blocEntity.restaurant = restaurant;
+        blocEntity.tables = [];
 
         if ((blocDto as any).id) {
           blocEntity.id = (blocDto as any).id;
@@ -276,19 +290,14 @@ export class RestaurantService {
         return blocEntity;
       });
 
-
+      console.log(blocsDto.map(b => b.restaurant?.id)); // ✅ debug
       restaurant.restaurantBlocs = blocsDto;
-
-
-      delete updateRestaurantDto.restaurantBlocs;
     }
 
-
-    Object.assign(restaurant, updateRestaurantDto);
-
-
     return instanceToPlain(await this.restaurantRepository.save(restaurant));
+
   }
+
 
 
 

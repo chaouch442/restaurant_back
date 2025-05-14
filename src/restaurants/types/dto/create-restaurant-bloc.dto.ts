@@ -1,7 +1,8 @@
 import { Expose } from "class-transformer";
-import { IsNumber, IsString, IsUUID } from "class-validator";
+import { IsNumber, IsOptional, IsString, IsUUID } from "class-validator";
 
 export class RestaurantBlocDto {
+
 
     @Expose()
     @IsUUID()

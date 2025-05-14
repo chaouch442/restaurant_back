@@ -11,7 +11,8 @@ export class RestaurantBloc {
     id: string;
 
     @ManyToOne(() => Restaurant, (restaurant) => restaurant.restaurantBlocs, {
-        eager: true,
+        eager: false,
+
     })
     @Exclude()
     restaurant: Restaurant;

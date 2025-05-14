@@ -88,7 +88,10 @@ export class RestaurantController {
     return this.mealTimeService.getMealTimesByRestaurant(id);
   }
 
-
+  // @Delete('restaurant-bloc/:blocId')
+  // async removeRestaurantBloc(@Param('blocId') blocId: string) {
+  //   return this.restaurantService.removeBlocById(blocId);
+  // }
 
 }
 
