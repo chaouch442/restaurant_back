@@ -186,13 +186,14 @@ export class RestaurantService {
         throw new NotFoundException(`Bloc avec ID ${blocData.blocId} introuvable`);
       }
 
-      if (blocData.maxTables === undefined || blocData.maxTables < 0) {
-        throw new BadRequestException(`maxTables est requis et doit être >= 0 pour le bloc ${bloc.id}`);
+      if (blocData.maxTables === undefined || blocData.maxTables <= 0) {
+        throw new BadRequestException(`maxTables est requis et doit être > 0 pour le bloc ${bloc.id}`);
       }
 
-      if (blocData.maxChaises === undefined || blocData.maxChaises < 0) {
-        throw new BadRequestException(`maxChaises est requis et doit être >= 0 pour le bloc ${bloc.id}`);
+      if (blocData.maxChaises === undefined || blocData.maxChaises <= 0) {
+        throw new BadRequestException(`maxChaises est requis et doit être > 0 pour le bloc ${bloc.id}`);
       }
+
 
       const restaurantBloc = new RestaurantBloc();
       restaurantBloc.bloc = bloc;
