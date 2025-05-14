@@ -154,6 +154,13 @@ export class RestaurantService {
     const nowHour = new Date().getHours();
     const startHour = parseInt(start);
     const endHour = parseInt(end);
+    if (isNaN(startHour) || isNaN(endHour)) {
+      throw new BadRequestException('Format horaire invalide. Utiliser HH-HH.');
+    }
+
+    if (startHour >= endHour) {
+      throw new BadRequestException("L'heure d'ouverture doit être avant l'heure de fermeture.");
+    }
     const isOpen = nowHour >= startHour && nowHour < endHour;
 
     const { restaurantBlocs, images, ...rest } = dto;
@@ -166,15 +173,25 @@ export class RestaurantService {
 
 
     restaurant.restaurantBlocs = [];
+    if (!restaurantBlocs || restaurantBlocs.length === 0) {
+      throw new BadRequestException('Au moins un bloc doit être assigné.');
+    }
 
     for (const blocData of restaurantBlocs) {
+      if (!blocData.blocId) {
+        throw new BadRequestException(`blocId manquant pour un des blocs.`);
+      }
       const bloc = await this.blocRepository.findOneBy({ id: blocData.blocId });
       if (!bloc) {
         throw new NotFoundException(`Bloc avec ID ${blocData.blocId} introuvable`);
       }
 
-      if (!blocData.maxTables) {
-        throw new BadRequestException(`maxTables est requis pour le bloc ${bloc.id}`);
+      if (blocData.maxTables === undefined || blocData.maxTables < 0) {
+        throw new BadRequestException(`maxTables est requis et doit être >= 0 pour le bloc ${bloc.id}`);
+      }
+
+      if (blocData.maxChaises === undefined || blocData.maxChaises < 0) {
+        throw new BadRequestException(`maxChaises est requis et doit être >= 0 pour le bloc ${bloc.id}`);
       }
 
       const restaurantBloc = new RestaurantBloc();
